@@ -9,7 +9,7 @@ Bu proje, Raspberry Pi Pico W kullanarak geliştirilen açık kaynaklı bir uçu
 - `src/types.h`: Uçuş verileri (IMU verileri, RC kanalları) için ortak veri yapıları (struct).
 - `src/def.h`: Genel tanımlamalar ve sistem zamanlama sabitleri.
 - `src/RX.cpp / .h`: Kumanda alıcısı (SBUS) ile haberleşme ve veri işleme.
-- `src/Sensors.cpp / .h`: MPU6050 sensöründen veri okuma ve kalibrasyon.
+- `src/Sensors.cpp / .h`: GY-87 (İvme, Gyro, Pusula, Barometre) yönetimi.
 - `src/IMU.cpp / .h`: Uçuş açılarının hesaplanması ve filtreleme algoritmaları.
 - `src/Output.cpp / .h`: Motor ESC kontrolü ve PWM sinyal çıkışları.
 
@@ -21,6 +21,10 @@ Bu proje, Raspberry Pi Pico W kullanarak geliştirilen açık kaynaklı bir uçu
 
 ## Donanım Gereksinimleri
 - Raspberry Pi Pico / Pico W
-- MPU6050 (I2C)
+- GY-87 Sensör Modülü (MPU6050 + HMC5883L + BMP180)
 - SBUS destekli alıcı
 - ESC ve Fırçasız Motorlar
+## Gelecek Geliştirmeler (Roadmap)
+- [ ] GCS (Yer İstasyonu) bağlantısı.
+- [ ] SD Kart ile uçuş verisi (Black Box) kaydı.
+- [ ] Kamera modülü entegrasyonu.
