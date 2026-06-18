@@ -1,4 +1,4 @@
-# PicoFlight: Raspberry Pi Pico Uçuş Kontrolcüsü
+# PicoFlightController: Raspberry Pi Pico Uçuş Kontrolcüsü
 
 Bu proje, Raspberry Pi Pico W kullanarak geliştirilen açık kaynaklı bir uçuş kontrolcüsü yazılımıdır. 
 
