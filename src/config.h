@@ -37,5 +37,13 @@
 #define MAX_ROLL_ANGLE  30.0f
 #define MAX_PITCH_ANGLE 20.0f
 #define YAW_SERVO_GAIN  0.7f
-
+// --- Uçuş Parametreleri (Örnek değerler) ---
+#define ANGLE_P_GAIN 2.0
+#define ANGLE_I_GAIN 0.05
+#define ANGLE_D_GAIN 0.1
+#define RATE_P_GAIN 0.1
+#define RATE_I_GAIN 0.01
+#define RATE_D_GAIN 0.01
+#define MAX_YAW_RATE 100.0 // Eksik olan bu değer
 #endif
+// --- Uçuş Parametreleri (Örnek değerler) ---

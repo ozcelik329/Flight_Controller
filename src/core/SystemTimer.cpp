@@ -2,6 +2,7 @@
 #include "FlightManager.h"
 #include "FixedWingMixer.h"
 #include "../drivers/Output.h"
+#include "PID.h"
 
 static PID rollAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
 static PID pitchAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
