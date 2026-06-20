@@ -39,7 +39,7 @@ Profesyonel standartlarda çalışmak için şu kurallar benimsenmiştir:
 * SBUS destekli alıcı
 * ESC ve Fırçasız Motor / Servolar
 * 
-##Donanım Yetenekleri ve Sensörler
+## Donanım Yetenekleri ve Sensörler
 Bu uçuş kontrolcüsü, modüler bir yapıya sahiptir ve config.h üzerinden kolayca konfigüre edilebilir:
 IMU (Dinamik Destek):
 Akıllı Algılama: Sistem, kullanılan sensör setini config.h dosyasındaki #define USE_GY87 satırı üzerinden otomatik algılar.
