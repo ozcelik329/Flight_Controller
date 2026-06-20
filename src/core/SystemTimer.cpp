@@ -2,7 +2,6 @@
 #include "FlightManager.h"
 #include "FixedWingMixer.h"
 #include "../drivers/Output.h"
-#include <pico/stdlib.h>
 
 static PID rollAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
 static PID pitchAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
@@ -41,10 +40,10 @@ void SystemManager::init() {
 }
 
 void SystemManager::core1_entry() {
-    uint32_t last_time = time_us_32();
+    unsigned long last_time = micros();
 
     while (true) {
-        uint32_t now = time_us_32();
+        unsigned long now = micros();
         float dt = (now - last_time) / 1000000.0f;
         if (dt <= 0.0f) {
             dt = 0.001f;
@@ -71,6 +70,6 @@ void SystemManager::core1_entry() {
             flightManager.getElevator(),
             flightManager.getRudder());
 
-        sleep_us(2500);
+        delayMicroseconds(2500);
     }
 }

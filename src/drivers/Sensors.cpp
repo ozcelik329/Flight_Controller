@@ -1,7 +1,7 @@
 #include "Sensors.h"
 
 void SensorManager::init() {
-    Wire.begin(PIN_SDA, PIN_SCL);
+    Wire.begin();
     Wire.setClock(400000);
 
     if (!mpu.begin()) {

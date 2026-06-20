@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "pico/multicore.h"
-#include "hardware/clocks.h"
 
 class SystemManager {
   public:

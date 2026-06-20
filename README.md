@@ -65,12 +65,13 @@ Bu proje hâlen prototip düzeyindedir. Aşağıdaki kritik özellikler mevcut d
 
 ## 🛠 Nasıl Derlenir?
 
-1. `platformio.ini` dosyasında doğru ortamın seçildiğinden emin olun.
+1. `platformio.ini` dosyasında doğru ortamın seçildiğinden emin olun. Bu proje için `framework = arduino` ve `board_build.core = earlephilhower` gereklidir.
 2. Projeyi PlatformIO ile açın.
 3. VS Code üzerindeki "Build" komutunu çalıştırın.
 4. `firmware.uf2` oluşursa, Pico'yu `BOOTSEL` moduna alıp dosyayı kopyalayın.
 
 > Not: Yerel makinenizde `pio` ya da `platformio` komutu yüklü olmalı.
+> `Sensors.cpp` içinde `Wire.begin()` kullanılıyor; `Wire.begin(SDA, SCL)` çağrısı Arduino-mbed tabanlı çekirdekte desteklenmez.
 
 ## 🛠 Donanım Gereksinimleri
 
