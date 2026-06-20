@@ -63,6 +63,9 @@ Teşekkürler / Referanslar
 Bu proje, aşağıdaki açık kaynaklı çalışmalardan esinlenerek geliştirilen mimari kavramlardan ve matematiksel uygulamalardan yararlanmaktadır:
 
 * JoshuaPeddle tarafından geliştirilen PicoFlight: Modüler yazılım mimarisi, IMU füzyon uygulaması ve düşük seviyeli donanım soyutlama mantığı nedeniyle referans alınmıştır.
-
+ 
 [https://github.com/JoshuaPeddle/PicoFlight]
+
+Developed by Muhammed Fatih Emre Özçelik/ozcelik329
+Copyright © 2026 Muhammed Fatih Emre Özçelik.
 
