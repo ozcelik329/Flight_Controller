@@ -59,6 +59,10 @@ Eğer pasifse; sistem sadece temel ivme ve jiroskop verileriyle çalışarak iş
 
 Proje, hobi seviyesinden profesyonel bir "Uçuş Bilgisayarı" seviyesine taşınmaktadır. Kod değişikliklerinde `config.h` (kullanıcı ayarları) ve `def.h` (sistem sabitleri) ayrımına dikkat edilmesi önemle rica olunur.
 
-### Kaynakça
-https://github.com/JoshuaPeddle/PicoFlight
+Teşekkürler / Referanslar
+Bu proje, aşağıdaki açık kaynaklı çalışmalardan esinlenerek geliştirilen mimari kavramlardan ve matematiksel uygulamalardan yararlanmaktadır:
+
+* JoshuaPeddle tarafından geliştirilen PicoFlight: Modüler yazılım mimarisi, IMU füzyon uygulaması ve düşük seviyeli donanım soyutlama mantığı nedeniyle referans alınmıştır.
+
+[https://github.com/JoshuaPeddle/PicoFlight]
 
