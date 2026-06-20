@@ -1,14 +1,20 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-void initSensors();    // MPU6050, HMC5883L ve BMP180 başlatma
-void updateSensors();  // Üç sensörden de veri okuma
-void readAccelGyro();
-void readCompass();
-void readBaro();
+#include <Arduino.h>
+#include "../config.h"
 
+class SensorManager {
+  public:
+    void init();        // Sensörleri I2C üzerinden başlat
+    void update();      // Gyro/Accel verilerini oku
+    
+    float getRoll();    // Hesaplanan açıları döndür
+    float getPitch();
+    float getYaw();
+
+  private:
+    float roll, pitch, yaw;
+};
 
 #endif
-
-
-

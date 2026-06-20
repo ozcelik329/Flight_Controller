@@ -1,0 +1,14 @@
+#ifndef SYSTEM_TIMER_H
+#define SYSTEM_TIMER_H
+
+#include <Arduino.h>
+#include "pico/multicore.h"
+#include "hardware/clocks.h"
+
+class SystemManager {
+  public:
+    static void init(); // 250MHz ve Core 1 başlatma
+    static void core1_entry(); // PID döngüsü buraya gelecek
+};
+
+#endif
