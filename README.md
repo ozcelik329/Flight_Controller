@@ -51,6 +51,4 @@ Profesyonel standartlarda çalışmak için şu kurallar benimsenmiştir:
 
 Proje, hobi seviyesinden profesyonel bir "Uçuş Bilgisayarı" seviyesine taşınmaktadır. Kod değişikliklerinde `config.h` (kullanıcı ayarları) ve `def.h` (sistem sabitleri) ayrımına dikkat edilmesi önemle rica olunur.
 
----
 
-**README dosyasını bu şekilde güncellemek, projeyi dışarıdan inceleyecek kişiler (veya gelecekteki sen) için çok daha anlaşılır bir dökümantasyon sunacaktır.** Şimdi, bu dökümanı da bir `git commit` ile GitHub'a göndermek ister misin, yoksa doğrudan `config.h` üzerinde çalışmaya mı başlayalım?
