@@ -27,4 +27,15 @@
 #define PWM_MAX 2000
 #define PWM_NEUTRAL 1500
 
+// RC kanal eşlemeleri
+#define RC_ROLL_CHANNEL    0
+#define RC_PITCH_CHANNEL   1
+#define RC_THROTTLE_CHANNEL 2
+#define RC_YAW_CHANNEL     3
+
+// Sabit kanatlı uçak için açı limitleri
+#define MAX_ROLL_ANGLE  30.0f
+#define MAX_PITCH_ANGLE 20.0f
+#define YAW_SERVO_GAIN  0.7f
+
 #endif

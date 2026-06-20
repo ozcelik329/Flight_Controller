@@ -2,6 +2,7 @@
 #define SENSORS_H
 
 #include <Arduino.h>
+#include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include "../config.h"
 
@@ -15,13 +16,15 @@ class SensorManager {
     void init();
     void update();
 
-    // Ham veriler (main.cpp ve IMU.cpp üzerinden erişilebilir)
+    // Ham veriler
     float ax, ay, az;
     float gx, gy, gz;
     
     #ifdef USE_GY87
       float mx, my, mz;
       float pressure;
+      bool hasMag;
+      bool hasBaro;
     #endif
 
   private:

@@ -9,15 +9,14 @@
 
 class RXManager {
   public:
-    void init();        // Alıcıyı başlatır (Serial1 / GP6)
-    void update();      // Veriyi okur ve normalize eder
-    
-    // İstenen kanal değerini 1000-2000 arası döndürür
-    // ch: 0 (Aileron), 1 (Elevator), 2 (Throttle), 3 (Rudder) gibi...
-    uint16_t getChannel(int ch); 
+    void init();
+    void update();
+    bool isValid() const;
+    uint16_t getChannel(int ch) const;
 
   private:
-    uint16_t channels[16]; // 16 kanallı veriyi tutar
+    uint16_t channels[16];
+    bool valid = false;
 };
 
 #endif

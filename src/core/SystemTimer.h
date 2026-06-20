@@ -7,8 +7,11 @@
 
 class SystemManager {
   public:
-    static void init(); // 250MHz ve Core 1 başlatma
-    static void core1_entry(); // PID döngüsü buraya gelecek
+    static void init();             // 250MHz ve Core 1 başlatma
+    static void core1_entry();      // PID ve Motor kontrol döngüsü
+    
+    // Core 1'in döngü kontrolü için flag
+    static volatile bool is_running;
 };
 
 #endif
