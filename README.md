@@ -59,4 +59,6 @@ Eğer pasifse; sistem sadece temel ivme ve jiroskop verileriyle çalışarak iş
 
 Proje, hobi seviyesinden profesyonel bir "Uçuş Bilgisayarı" seviyesine taşınmaktadır. Kod değişikliklerinde `config.h` (kullanıcı ayarları) ve `def.h` (sistem sabitleri) ayrımına dikkat edilmesi önemle rica olunur.
 
+### Kaynakça
+https://github.com/JoshuaPeddle/PicoFlight
 
