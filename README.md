@@ -23,7 +23,44 @@ The software follows a modular design to separate low-level hardware abstraction
 | `src/drivers/` | Hardware abstraction layers (MPU6050, GY-87, SBUS, PWM). |
 | `src/telemetry/` | MAVLink-based communication protocols for GCS integration. |
 | `src/utils/` | Logger and mathematical helper functions. |
-<img width="272" height="368" alt="aeropico_fc_fixed_wing_diagram" src="https://github.com/user-attachments/assets/bdab3c10-101b-4371-b246-786677c7653a" />
+```mermaid
+flowchart TD
+    subgraph C0["🟢 Core 0 — Sensör & RX"]
+        IMU["MPU6050 IMU"]
+        SP["Sensör işleme\nHam ivme & jiroskop"]
+        MF["Madgwick filtresi\nQuaternion → Euler açıları"]
+        RC["PWM RC alıcısı\nKanal 1–4 (1000–2000 µs)"]
+        MX["🔒 Mutex\nÇift-core veri koruması"]
+
+        IMU --> SP --> MF --> MX
+        RC --> MX
+    end
+
+    subgraph C1["🟣 Core 1 — PID & Çıkış"]
+        OP["Outer loop: Angle PID\nHedef roll / pitch açısı"]
+        IP["Inner loop: Rate PID\nHedef açısal hız → düzeltme"]
+        FM["FixedWingMixer\nPID + RC → servo PWM"]
+        SC["Güvenlik & sınırlama\nPWM 1000–2000 µs arası kısıt"]
+
+        OP --> IP --> FM --> SC
+    end
+
+    MX -- "Euler açıları\nRC girişi" --> OP
+    MX -. "Gyro hızları" .-> IP
+
+    SC --> A["Aileron servo"]
+    SC --> E["Elevator servo"]
+    SC --> R["Rudder servo"]
+    SC --> T["Throttle ESC"]
+
+    subgraph FUTURE["⬜ Gelecekte eklenecek"]
+        direction LR
+        TEL["Telemetri\nWiFi / LoRa + MAVLink"]
+        CAM["Kamera\nESP32-CAM / RP Zero"]
+        GCS["GCS — Rasp 3B+\nProcessing / uygulama + anten"]
+    end
+```
+
 
 ---
 
