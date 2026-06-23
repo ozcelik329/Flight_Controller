@@ -154,17 +154,23 @@ The core firmware (located in `firmware/`) is strictly optimized for flight stab
 | GPS navigation | 📅 |
 | GCS with tracking antenna | 📅 |
 
+---
 
+## 🛠 How to Build
 
+1. **Clone** this repository.
+2. Open the project in **PlatformIO** (VS Code).
+3. Verify `platformio.ini` targets the `earlephilhower` RP2040 core.
+4. Run **Build**.
+5. Copy the generated `firmware.uf2` to your Pico in **BOOTSEL** mode. 🚀
 
-### Core Task Structure
-We are moving away from the "Main Loop" dependency by distributing critical flight operations into independent FreeRTOS tasks:
+---
 
-* **`Task_Control` (High Priority):** Handles the PID flight loop and sensor fusion. This task is strictly synchronized to prevent jitter.
-* **`Task_Sensors` (DMA-driven):** Manages data acquisition from the IMU using DMA, eliminating CPU-bound I/O waits.
-* **`Task_Comms` (Background):** Manages asynchronous MAVLink parsing and blackbox UART logging.
-* **`Task_Failsafe` (System Guard):** A dedicated heartbeat monitor that triggers the watchdog or RTL protocol if any critical task fails to report within the specified interval.
+## 🤝 Contribute
+
+Issues and pull requests are welcome. If you are new to embedded systems and want to understand how a flight controller works from the ground up, this codebase is a good place to start — open an issue and ask questions freely! 💡
+
+---
 
 *Developed by Muhammed Fatih Emre Özçelik*
 *Copyright © 2026 Muhammed Fatih Emre Özçelik. All rights reserved.*
-
