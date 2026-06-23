@@ -65,7 +65,19 @@ graph TD
     SC --> T["Throttle (ESC)"]
 
 ```
-
+## 🛠 Hardware Pinout
+| Function | Pin | Type | Description |
+| :--- | :--- | :--- | :--- |
+| **SDA (I2C)** | GP4 | I/O | Sensor Communication (SDA) |
+| **SCL (I2C)** | GP5 | I/O | Sensor Communication (SCL) |
+| **SBUS (RX)** | GP6 | Input | RC Receiver Signal Input |
+| **AILERON** | GP16 | PWM | Aileron Servo |
+| **ELEVATOR** | GP17 | PWM | Elevator Servo |
+| **RUDDER** | GP18 | PWM | Rudder Servo |
+| **THROTTLE** | GP19 | PWM | Motor / ESC Control |
+| **Batt Monitor**| GP26 | ADC | Battery Voltage Monitoring |
+| **UART0 TX** | GP0 | UART | Telemetry / GPS |
+| **UART0 RX** | GP1 | UART | Telemetry / GPS |
 ---
 
 ## 📂 Project Structure
