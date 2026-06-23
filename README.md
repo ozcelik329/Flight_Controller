@@ -23,6 +23,7 @@ The software follows a modular design to separate low-level hardware abstraction
 | `src/drivers/` | Hardware abstraction layers (MPU6050, GY-87, SBUS, PWM). |
 | `src/telemetry/` | MAVLink-based communication protocols for GCS integration. |
 | `src/utils/` | Logger and mathematical helper functions. |
+<img width="2720" height="3680" alt="aeropico_fc_fixed_wing_diagram" src="https://github.com/user-attachments/assets/bdab3c10-101b-4371-b246-786677c7653a" />
 
 ---
 
