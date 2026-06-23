@@ -25,43 +25,38 @@ The software follows a modular design to separate low-level hardware abstraction
 | `src/utils/` | Logger and mathematical helper functions. |
 ```mermaid
 graph TD
-    %% Core 0 - Data Acquisition
-    subgraph C0 ["CORE 0: DATA ACQUISITION"]
-        IMU["MPU6050 IMU"] --> SP["SENSOR PROCESSING"]
-        SP --> MF["MADGWICK FILTER"]
-        RC["RC RECEIVER"] --> MX["🔒 MUTEX"]
-        GPS["GPS MODULE"] --> MX
+    %% Core 0 - Data Acquisition & Pre-processing
+    subgraph C0 ["Core 0: Data Acquisition"]
+        IMU["MPU6050 IMU"] --> SP["Sensor Processing\nAcc & Gyro"]
+        SP --> MF["Madgwick Filter\nQuaternion → Euler"]
+        RC["RC Receiver\nChannels 1–4"] --> MX["🔒 Mutex\nData Protection"]
+        GPS["GPS Module"] --> MX
         MF --> MX
     end
 
-    %% Core 1 - Flight Control
-    subgraph C1 ["CORE 1: FLIGHT CONTROL"]
-        OP["ANGLE PID (OUTER)"] --> IP["RATE PID (INNER)"]
-        IP --> FM["MIXER"]
-        FM --> FSM{"FAILSAFE"}
-        FSM --> SC["SAFETY LIMITS"]
-        NAV["NAV & MAVLINK"]
+    %% Core 1 - Flight Control & Actuation
+    subgraph C1 ["Core 1: Flight Control"]
+        OP["Outer Loop: Angle PID"] --> IP["Inner Loop: Rate PID"]
+        IP --> FM["Mixer\nPID + RC → Servos"]
+        FM --> FSM{"Failsafe Monitor"}
+        FSM --> SC["Safety Limits\n1000–2000μs"]
+        
+        NAV["Navigation & MAVLink"]
     end
 
-    %% Cross-Core
+    %% Cross-Core Connections
     MX -- "Euler & RC" --> OP
     MX -. "Gyro Rates" .-> IP
     MX -- "Pos & Heading" --> NAV
-    NAV <==> MAV["MAVLINK INTERFACE"]
+    NAV <==> MAV["MAVLink Interface"]
 
-    %% Actuation
-    SC --> A["AILERON"]
-    SC --> E["ELEVATOR"]
-    SC --> R["RUDDER"]
-    SC --> T["THROTTLE"]
+    %% Actuators
+    SC --> A["Aileron"]
+    SC --> E["Elevator"]
+    SC --> R["Rudder"]
+    SC --> T["Throttle (ESC)"]
 
-    %% Monochrome Styling
-    classDef default fill:#fff,stroke:#000,stroke-width:1px,color:#000;
-    classDef core fill:#f0f0f0,stroke:#000,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef mutex fill:#000,stroke:#000,color:#fff;
-    
-    class C0,C1 core;
-    class MX mutex;
+    %% No styling - Default Monochrome
 
 ```
 ---
