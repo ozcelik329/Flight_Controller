@@ -112,8 +112,8 @@ graph TD
 | PWM RC input | ✅ |
 | MPU6050 + GY-87 support | ✅ |
 | Mutex-protected dual-core sharing | ✅ |
-| MAVLink telemetry | ⏳ |
-| Failsafe & signal-loss handling | ⏳ |
+| MAVLink telemetry | ⏳(Check out other branch) |
+| Failsafe & signal-loss handling | ⏳(Check out other branch)  |
 | WiFi / LoRa telemetry (Pico W) | 📅 |
 | GCS with tracking antenna | 📅 |
 
