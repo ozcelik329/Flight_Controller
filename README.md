@@ -3,107 +3,133 @@
 ![C++](https://img.shields.io/badge/Language-C++-00599C)
 ![MAVLink](https://img.shields.io/badge/Protocol-MAVLink-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
-# AeroPico FC: High-Performance Fixed-Wing Flight Controller
 
-**AeroPico FC** is a high-performance, real-time flight control firmware engineered for fixed-wing UAV platforms. Built on the RP2040 architecture, it leverages dual-core concurrent processing to achieve deterministic flight stability and low-latency control loops essential for professional-grade aerial navigation.
-Design Philosophy: AeroPico FC prioritizes efficiency and deterministic behavior. By isolating high-frequency sensor fusion and PID control from communication-heavy tasks, the architecture maintains rock-solid performance even under heavy computational load.
+# AeroPico FC — Fixed-Wing Flight Controller
 
-> **Note:** This project is currently in the **prototype phase**. It is intended for educational and experimental purposes and should not be used in critical industrial or commercial applications.
+**AeroPico FC** is an open-source flight controller firmware for fixed-wing UAVs, built on the RP2040 (Raspberry Pi Pico). It uses the chip's dual-core architecture to keep sensor fusion and flight control on separate cores — the same separation professional autopilots rely on, now accessible to anyone.
 
-### 🚀 Key Technical Capabilities
-* Dual-Core Determinism: Asymmetric multi-processing (AMP) architecture; Core 0 handles real-time sensor fusion and data acquisition, while Core 1 executes mission-critical PID control loops.
-* Precision PID Control: Advanced nested PID controller architecture (Angle + Rate) for ultra-stable flight dynamics.
-* Optimized Sensor Fusion: Hardware-accelerated Madgwick filter implementation for precise attitude estimation at high sample rates.
-* MAVLink Integration: Industry-standard MAVLink telemetry support, enabling deep integration with advanced Ground Control Stations (GCS) for mission planning and real-time monitoring.
-* Fail-Safe Architecture: Hardware-level monitoring protocols to ensure automated recovery and safe state transitions in the event of signal loss or sensor failure.
+Whether you are a hobbyist building your first fixed-wing or a developer researching custom autopilot stacks, AeroPico FC gives you a clean, readable codebase you can actually understand and extend.
 
-### 🏗 System Architecture
-The firmware is built as a highly modular stack, adhering to professional embedded software engineering standards to ensure high reliability and maintainability.
+> **Note:** This project is currently in the **prototype phase** and is intended for educational and experimental use. It is not certified for commercial or safety-critical applications.
 
-### 📂 Project Structure
+---
+
+## Why AeroPico FC?
+
+Most hobby-grade firmware is a black box. AeroPico FC is written to be readable first — every module has a single responsibility, every design decision is traceable in the code. You can start by tuning PID gains in `config.h` without touching anything else, and work your way down to the sensor fusion math when you are ready.
+
+At the same time, the architecture does not cut corners. Dual-core task isolation, mutex-protected cross-core data sharing, a cascaded PID structure, and a hardware abstraction layer are patterns borrowed from professional embedded systems — not academic exercises.
+
+---
+
+## Key Features
+
+- **Dual-core isolation** — Core 0 handles sensor reading and RC input; Core 1 runs the PID loop and drives servo outputs. They never block each other.
+- **Cascaded PID** — Outer angle loop feeds a target rate into the inner rate loop, giving smoother and more precise attitude control than a single-loop approach.
+- **Madgwick filter** — Efficient quaternion-based attitude estimation that works well even on resource-constrained hardware.
+- **MAVLink ready** — Telemetry layer is structured for MAVLink integration with any standard GCS.
+- **MPU6050 & GY-87 support** — Works with both a basic IMU and a 9-DOF module (with magnetometer).
+- **Configurable** — Pins, PID constants, RC ranges, and loop frequency are all in one place: `config.h`.
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    subgraph C0["Core 0 — Sensör & RX"]
+        IMU["MPU6050 IMU"]
+        SP["Sensör işleme\nHam ivme & jiroskop"]
+        MF["Madgwick filtresi\nQuaternion → Euler açıları"]
+        RC["PWM RC alıcısı\nKanal 1–4 (1000–2000 µs)"]
+        MX["🔒 Mutex\nÇift-core veri koruması"]
+
+        IMU --> SP --> MF --> MX
+        RC --> MX
+    end
+
+    subgraph C1["Core 1 — PID & Çıkış"]
+        OP["Outer loop: Angle PID\nHedef roll / pitch açısı"]
+        IP["Inner loop: Rate PID\nHedef açısal hız → düzeltme"]
+        FM["FixedWingMixer\nPID + RC → servo PWM"]
+        SC["Güvenlik & sınırlama\nPWM 1000–2000 µs arası kısıt"]
+
+        OP --> IP --> FM --> SC
+    end
+
+    MX -- "Euler açıları / RC girişi" --> OP
+    MX -. "Gyro hızları" .-> IP
+
+    SC --> A["Aileron servo"]
+    SC --> E["Elevator servo"]
+    SC --> R["Rudder servo"]
+    SC --> T["Throttle ESC"]
+
+    subgraph FUTURE["Gelecekte eklenecek"]
+        direction LR
+        TEL["Telemetri\nWiFi / LoRa + MAVLink"]
+        CAM["Kamera\nESP32-CAM / RP Zero"]
+        GCS["GCS — Rasp 3B+\nProcessing / uygulama + anten"]
+    end
+```
+
+---
+
+## Project Structure
 
 | Module | Description |
-| --- | --- |
-| `src/main.cpp` | Entry point managing the `setup()` and `loop()` control cycles. |
-| `src/config.h` | Central configuration for pins, PID constants, and RC parameters. |
-| `src/core/` | Flight management, Madgwick sensor fusion, and PID controller loops. |
-| `src/drivers/` | Hardware abstraction layers (MPU6050, GY-87, SBUS, PWM). |
-| `src/telemetry/` | MAVLink-based communication protocols for GCS integration. |
-| `src/utils/` | Logger and mathematical helper functions. |
-```mermaid
-graph TD
-    %% Core 0 - Data Acquisition & Pre-processing
-    subgraph C0 ["Core 0: Data Acquisition"]
-        IMU["MPU6050 IMU"] --> SP["Sensor Processing\nAcc & Gyro"]
-        SP --> MF["Madgwick Filter\nQuaternion → Euler"]
-        RC["RC Receiver\nChannels 1–4"] --> MX["🔒 Mutex\nData Protection"]
-        GPS["GPS Module"] --> MX
-        MF --> MX
-    end
+|---|---|
+| `src/main.cpp` | Entry point, `setup()` and `loop()` |
+| `src/config.h` | Pins, PID gains, RC parameters — start here |
+| `src/core/` | Flight manager, Madgwick filter, PID controller, mixer |
+| `src/drivers/` | Hardware abstraction: MPU6050, GY-87, PWM output, RC input |
+| `src/telemetry/` | MAVLink communication layer (in progress) |
+| `src/utils/` | Logger, math helpers |
 
-    %% Core 1 - Flight Control & Actuation
-    subgraph C1 ["Core 1: Flight Control"]
-        OP["Outer Loop: Angle PID"] --> IP["Inner Loop: Rate PID"]
-        IP --> FM["Mixer\nPID + RC → Servos"]
-        FM --> FSM{"Failsafe Monitor"}
-        FSM --> SC["Safety Limits\n1000–2000μs"]
-        
-        NAV["Navigation & MAVLink"]
-    end
+---
 
-    %% Cross-Core Connections
-    MX -- "Euler & RC" --> OP
-    MX -. "Gyro Rates" .-> IP
-    MX -- "Pos & Heading" --> NAV
-    NAV <==> MAV["MAVLink Interface"]
+## Performance
 
-    %% Actuators
-    SC --> A["Aileron"]
-    SC --> E["Elevator"]
-    SC --> R["Rudder"]
-    SC --> T["Throttle (ESC)"]
+| Parameter | Value |
+|---|---|
+| Control loop frequency | 500 Hz (configurable) |
+| Cross-core data sharing | Mutex-protected, no busy-wait |
+| Attitude estimation | Madgwick (quaternion, tunable β) |
+| PWM output range | 1000–2000 µs |
 
-    %% No styling - Default Monochrome
+---
 
-```
-### 📈 Deployment & Performance
-AeroPico FC is designed for high-performance deployment. It provides the low-level precision typically reserved for expensive hardware, condensed into an open-source, flexible, and powerful firmware solution.
-* Control Frequency: Configurable high-rate loop (Targeting 400Hz+).
-* Latency: Sub-millisecond interrupt response for flight-critical inputs.
-* Extensibility: Decoupled hardware abstraction layers (HAL) allowing seamless integration with various IMU sensors and radio protocols.
-
-###  Why AeroPico FC?
-Unlike hobby-grade frameworks, AeroPico FC is designed to be extensible and predictable. It serves as an ideal foundation for research, autonomous mission development, and high-precision fixed-wing flight.
-
-### 🚀 Roadmap
+## Roadmap
 
 | Feature | Status |
-| --- | --- |
-| Basic Flight Control Loop | ✅ Completed |
-| SBUS RC Input | ✅ Completed |
-| MPU6050 + GY-87 Support | ✅ Completed |
-| MAVLink Telemetry | ⏳ In Progress |
-| Failsafe & Error Tolerance | ⏳ In Progress |
-| GCS Integration | 📅 Planned |
+|---|---|
+| Basic flight control loop | ✅ Done |
+| PWM RC input | ✅ Done |
+| MPU6050 + GY-87 support | ✅ Done |
+| Mutex-protected dual-core sharing | ✅ Done |
+| MAVLink telemetry | ⏳ In progress |
+| Failsafe & signal-loss handling | ⏳ In progress |
+| WiFi / LoRa telemetry (Pico W) | 📅 Planned |
+| GCS with tracking antenna | 📅 Planned |
+| Camera integration (ESP32-CAM) | 📅 Planned |
 
 ---
 
-### 🛠 How to Build
+## How to Build
 
-1. **Clone** this repository.
+1. Clone this repository.
 2. Open the project in **PlatformIO** (VS Code).
-3. Ensure your `platformio.ini` is configured for the `earlephilhower` core.
-4. Run the **Build** command.
-5. Copy the generated `firmware.uf2` file to your Raspberry Pi Pico in **BOOTSEL** mode.
+3. Verify `platformio.ini` targets the `earlephilhower` RP2040 core.
+4. Run **Build**.
+5. Copy the generated `firmware.uf2` to your Pico in **BOOTSEL** mode.
 
 ---
 
-### 💡 Contribute
+## Contribute
 
-I welcome contributions! If you have suggestions, bug reports, or feature requests, feel free to **open an Issue** or submit a **Pull Request**.
+Issues and pull requests are welcome. If you are new to embedded systems and want to understand how a flight controller works from the ground up, this codebase is a good place to start — open an issue and ask questions freely.
 
-*Developed by Muhammed Fatih Emre Özçelik*
+---
+
+*Developed by Muhammed Fatih Emre Özçelik*  
 *Copyright © 2026 Muhammed Fatih Emre Özçelik. All rights reserved.*
-
----
-
