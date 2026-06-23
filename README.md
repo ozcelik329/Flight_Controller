@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/944bbdf8-4cdd-4a61-a41a-8abdeb661b10" width="658" height="298" />
+  <img src="https://github.com/user-attachments/assets/0a66fec3-2c89-4f69-b286-e269c3606a84" width="658" height="298" />
 </div>
 
 
