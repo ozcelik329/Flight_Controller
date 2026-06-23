@@ -10,6 +10,9 @@ The purpose of this branch is to experimentally add the following features witho
 * sensor reading via DMA, watchdog timer[⏳]
 * failsafe & heartbeat mechanism[❌]
 * MAVLink parser (works even without zero, waits for serial port), and blackbox logger (via UART).[❌]
+### 🚧 Implementation Challenges
+* **MAVLink Parser:** Serial buffer yönetiminde "asynchronous fragment" hatalarını minimize etmek için dairesel tampon (ring buffer) boyutu optimize ediliyor.
+* **Failsafe:** Watchdog timer'ın FreeRTOS `Task_Failsafe` ile çakışmaması için sistem `reset` mantığı üzerinde çalışılıyor.
 
 
 ### Core Task Structure
