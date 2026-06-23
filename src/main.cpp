@@ -5,13 +5,14 @@
 #include "core/FlightManager.h"
 #include "core/SystemTimer.h"
 #include "utils/Logger.h"
+#include "telemetry/MavlinkHandler.h"
 
 FlightManager flightManager;
 
 void taskSensor(void* pvParameters) {
     for (;;) {
         flightManager.update();
-        watchdog_update();  // Watchdog'u besle
+        watchdog_update();
         vTaskDelay(pdMS_TO_TICKS(2));
     }
 }
@@ -23,33 +24,64 @@ void taskFlight(void* pvParameters) {
     }
 }
 
+void taskTelemetry(void* pvParameters) {
+    for (;;) {
+        mavlink.update();
+
+        // 10 Hz attitude gönder
+        mavlink.sendAttitude(
+            flightManager.getRoll(),
+            flightManager.getPitch(),
+            flightManager.getYaw(),
+            flightManager.getGyroX(),
+            flightManager.getGyroY(),
+            flightManager.getGyroZ()
+        );
+
+        mavlink.sendRCChannels(
+            flightManager.getAileron(),
+            flightManager.getElevator(),
+            flightManager.getThrottle(),
+            flightManager.getRudder()
+        );
+
+        mavlink.sendSysStatus(true, !flightManager.getRudder());
+
+        vTaskDelay(pdMS_TO_TICKS(100)); // 10 Hz
+    }
+}
+
 void setup() {
     Serial.begin(115200);
 
-    // Watchdog: 2 saniye içinde beslenmezse reset
     watchdog_enable(WATCHDOG_TIMEOUT_MS, true);
 
     Logger::init();
     flightManager.init();
-    Logger::log("AeroPico FC Baslatildi!");
+    mavlink.init();
 
-    // Watchdog'un son reset sebebini logla
     if (watchdog_caused_reboot()) {
         Logger::log("[WATCHDOG] Onceki oturum watchdog ile resetlendi!");
     }
 
+    Logger::log("AeroPico FC Baslatildi!");
+
     xTaskCreateAffinitySet(
         taskSensor, "SensorTask",
         2048, NULL, 2,
-        (1 << 0),   // affinity mask
-        NULL        // task handle
+        (1 << 0), NULL
     );
 
     xTaskCreateAffinitySet(
         taskFlight, "FlightTask",
         2048, NULL, 3,
-        (1 << 1),   // affinity mask
-        NULL        // task handle
+        (1 << 1), NULL
+    );
+
+    xTaskCreateAffinitySet(
+        taskTelemetry, "TelemetryTask",
+        2048, NULL, 1,
+        (1 << 0), NULL
     );
 
     vTaskStartScheduler();
