@@ -35,43 +35,9 @@ At the same time, the architecture does not cut corners. Dual-core task isolatio
 
 ## System Architecture
 
-```mermaid
-flowchart TD
-    subgraph C0["Core 0 — Sensör & RX"]
-        IMU["MPU6050 IMU"]
-        SP["Sensör işleme\nHam ivme & jiroskop"]
-        MF["Madgwick filtresi\nQuaternion → Euler açıları"]
-        RC["PWM RC alıcısı\nKanal 1–4 (1000–2000 µs)"]
-        MX["🔒 Mutex\nÇift-core veri koruması"]
+```mermaidgraph TD    %% Core 0 - Data Acquisition & Pre-processing    subgraph C0 ["Core 0: Data Acquisition"]        IMU["MPU6050 IMU"] --> SP["Sensor Processing\nAcc & Gyro"]        SP --> MF["Madgwick Filter\nQuaternion → Euler"]        RC["RC Receiver\nChannels 1–4"] --> MX["🔒 Mutex\nData Protection"]        GPS["GPS Module"] --> MX        MF --> MX    end     %% Core 1 - Flight Control & Actuation    subgraph C1 ["Core 1: Flight Control"]        OP["Outer Loop: Angle PID"] --> IP["Inner Loop: Rate PID"]        IP --> FM["Mixer\nPID + RC → Servos"]        FM --> FSM{"Failsafe Monitor"}        FSM --> SC["Safety Limits\n1000–2000μs"]                NAV["Navigation & MAVLink"]    end     %% Cross-Core Connections    MX -- "Euler & RC" --> OP    MX -. "Gyro Rates" .-> IP    MX -- "Pos & Heading" --> NAV    NAV <==> MAV["MAVLink Interface"]     %% Actuators    SC --> A["Aileron"]    SC --> E["Elevator"]    SC --> R["Rudder"]    SC --> T["Throttle (ESC)"]     %% No styling - Default Monochrome ```
 
-        IMU --> SP --> MF --> MX
-        RC --> MX
-    end
 
-    subgraph C1["Core 1 — PID & Çıkış"]
-        OP["Outer loop: Angle PID\nHedef roll / pitch açısı"]
-        IP["Inner loop: Rate PID\nHedef açısal hız → düzeltme"]
-        FM["FixedWingMixer\nPID + RC → servo PWM"]
-        SC["Güvenlik & sınırlama\nPWM 1000–2000 µs arası kısıt"]
-
-        OP --> IP --> FM --> SC
-    end
-
-    MX -- "Euler açıları / RC girişi" --> OP
-    MX -. "Gyro hızları" .-> IP
-
-    SC --> A["Aileron servo"]
-    SC --> E["Elevator servo"]
-    SC --> R["Rudder servo"]
-    SC --> T["Throttle ESC"]
-
-    subgraph FUTURE["Gelecekte eklenecek"]
-        direction LR
-        TEL["Telemetri\nWiFi / LoRa + MAVLink"]
-        CAM["Kamera\nESP32-CAM / RP Zero"]
-        GCS["GCS — Rasp 3B+\nProcessing / uygulama + anten"]
-    end
-```
 
 ---
 
