@@ -1,14 +1,19 @@
 #include "RX.h"
 #include "sbus.h"
 
-bfs::SbusRx sbus_rx(&Serial1);
+bfs::SbusRx sbus_rx(&Serial2);
 bfs::SbusData sbus_data;
 
 void RXManager::init() {
+    // Serial2 → GP1 (RX), transistör ile invert edilmiş SBUS
+    Serial2.setRX(PIN_SBUS_RX);
+    Serial2.begin(100000, SERIAL_8E2);
     sbus_rx.Begin();
-    valid      = false;
-    _failsafe  = false;
+
+    valid          = false;
+    _failsafe      = false;
     _lastValidTime = millis();
+
     for (int i = 0; i < 16; i++) {
         channels[i] = PWM_NEUTRAL;
     }

@@ -6,16 +6,24 @@
 // --- Sensör Tipi ---
 #define USE_GY87
 
-// --- Donanım Pin Atamaları ---
-#define PIN_SDA 4
-#define PIN_SCL 5
-#define PIN_SBUS 6
+// --- UART Pin Atamaları ---
+#define PIN_SBUS_RX     1   // UART0 RX — SBUS alıcı (transistör ile invert)
+#define PIN_GPS_TX      8
+#define PIN_GPS_RX      9
 
-// Çıkış (PWM) Pinleri
-#define PIN_AILERON 16
-#define PIN_ELEVATOR 17
-#define PIN_RUDDER 18
-#define PIN_THROTTLE 19
+// --- I2C Pin Atamaları ---
+#define PIN_SDA         4
+#define PIN_SCL         5
+
+// --- PIO UART — ESP32-CAM MAVLink ---
+#define PIN_ESP_TX      12
+#define PIN_ESP_RX      13
+
+// --- PWM Servo Çıkışları ---
+#define PIN_AILERON     16
+#define PIN_ELEVATOR    17
+#define PIN_RUDDER      18
+#define PIN_THROTTLE    19
 
 // --- Uçuş Parametreleri ---
 #define PID_P_GAIN 0.5
@@ -46,12 +54,14 @@
 #define YAW_SERVO_GAIN  0.7f
 #define MAX_YAW_RATE    100.0f
 
-#define LOOP_TIME_MS    20 
+#define LOOP_TIME_MS    20
+
 // Watchdog & Failsafe
-#define WATCHDOG_TIMEOUT_MS     2000   // 2 saniye cevap gelmezse reset
-#define FAILSAFE_TIMEOUT_MS     500    // 500ms RC sinyali gelmezse failsafe
+#define WATCHDOG_TIMEOUT_MS     2000
+#define FAILSAFE_TIMEOUT_MS     500
 #define FAILSAFE_THROTTLE       PWM_MIN
 #define FAILSAFE_AILERON        PWM_NEUTRAL
 #define FAILSAFE_ELEVATOR       PWM_NEUTRAL
 #define FAILSAFE_RUDDER         PWM_NEUTRAL
-#endif // CONFIG_H
+
+#endif
