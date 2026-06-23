@@ -2,8 +2,6 @@
 ![RP2040](https://img.shields.io/badge/Platform-RP2040-7546C6)
 ![C++](https://img.shields.io/badge/Language-C++-00599C)
 ![MAVLink](https://img.shields.io/badge/Protocol-MAVLink-red)
-![Status](https://img.shields.io/badge/Status-Development-orange)
-![Version](https://img.shields.io/badge/Version-0.1.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 # AeroPico FC: Raspberry Pi Pico Fixed-Wing Flight Controller
 
