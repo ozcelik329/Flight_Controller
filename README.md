@@ -8,9 +8,9 @@ The purpose of this branch is to experimentally add the following features witho
 | Feature | Status |
 | --- | --- |
 | FreeRTOS integration | ✅ |
-| PWM output via PIO (resetting servo jitter)| largely completed(✅) |
-| Sensor reading via DMA, watchdog timer | ⏳ |
-| failsafe & heartbeat mechanism | 📅 |
+| PWM output via PIO (resetting servo jitter)| ✅ |
+| Sensor reading via DMA, watchdog timer | ✅ |
+| failsafe & heartbeat mechanism | ✅ |
 | MAVLink parser (works even without zero, waits for serial port), and blackbox logger (via UART) | 📅 |
 
 
