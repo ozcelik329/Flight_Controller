@@ -155,7 +155,7 @@ The core firmware (located in `firmware/`) is strictly optimized for flight stab
 | GCS with tracking antenna | 📅 |
 
 ---
- **Note:** This project is currently in the **prototype phase** and is intended for educational and experimental use. It is not certified for commercial or safety-critical applications.
+> ⚠️ **Note:** The current code contains non-essential ESP and telemetry components; if you don't need them, you can review and delete the telemetry folder. Also, check the config.h file for PIN configurations.
  ---
 ## 🛠 How to Build
 1. **Clone** this repository.
