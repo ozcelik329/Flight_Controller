@@ -6,6 +6,7 @@
 #include "core/SystemTimer.h"
 #include "utils/Logger.h"
 #include "telemetry/MavlinkHandler.h"
+#include "telemetry/Blackbox.h"
 
 FlightManager flightManager;
 
@@ -28,26 +29,26 @@ void taskTelemetry(void* pvParameters) {
     for (;;) {
         mavlink.update();
 
-        // 10 Hz attitude gönder
-        mavlink.sendAttitude(
-            flightManager.getRoll(),
-            flightManager.getPitch(),
-            flightManager.getYaw(),
-            flightManager.getGyroX(),
-            flightManager.getGyroY(),
-            flightManager.getGyroZ()
-        );
+        float roll  = flightManager.getRoll();
+        float pitch = flightManager.getPitch();
+        float yaw   = flightManager.getYaw();
+        float gx    = flightManager.getGyroX();
+        float gy    = flightManager.getGyroY();
+        float gz    = flightManager.getGyroZ();
+        uint16_t thr = flightManager.getThrottle();
+        uint16_t ail = flightManager.getAileron();
+        uint16_t ele = flightManager.getElevator();
+        uint16_t rud = flightManager.getRudder();
 
-        mavlink.sendRCChannels(
-            flightManager.getAileron(),
-            flightManager.getElevator(),
-            flightManager.getThrottle(),
-            flightManager.getRudder()
-        );
+        mavlink.sendAttitude(roll, pitch, yaw, gx, gy, gz);
+        mavlink.sendRCChannels(ail, ele, thr, rud);
+        mavlink.sendSysStatus(true, false);
 
-        mavlink.sendSysStatus(true, !flightManager.getRudder());
+        // Blackbox: 50 Hz
+        blackbox.log(roll, pitch, yaw, gx, gy, gz,
+                     thr, ail, ele, rud, false);
 
-        vTaskDelay(pdMS_TO_TICKS(100)); // 10 Hz
+        vTaskDelay(pdMS_TO_TICKS(20)); // 50 Hz
     }
 }
 
@@ -59,6 +60,7 @@ void setup() {
     Logger::init();
     flightManager.init();
     mavlink.init();
+    blackbox.init();
 
     if (watchdog_caused_reboot()) {
         Logger::log("[WATCHDOG] Onceki oturum watchdog ile resetlendi!");
