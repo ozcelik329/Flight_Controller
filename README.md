@@ -1,7 +1,7 @@
-![PlatformIO](https://img.shields.io/badge/PlatformIO-Compatible-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Language](https://img.shields.io/badge/Language-C++-blue)
-![Platform](https://img.shields.io/badge/Platform-RP2040-brightgreen)
+![PlatformIO](https://img.shields.io/badge/PlatformIO-Compatible-orange)
+![License](https://img.shields.io/badge/License-MIT-darkblue)
+![Language](https://img.shields.io/badge/Language-C++-white)
+![Platform](https://img.shields.io/badge/Platform-RP2040-red)
 # AeroPico FC: Raspberry Pi Pico Fixed-Wing Flight Controller
 
 **AeroPico FC** is a modular, lightweight flight controller software designed for fixed-wing aircraft, leveraging the power of the **Raspberry Pi Pico**. It provides a customizable, low-cost flight control solution for hobbyists and researchers.
