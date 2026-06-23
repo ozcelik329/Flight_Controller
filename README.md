@@ -5,11 +5,14 @@
 This branch is dedicated to transitioning the flight controller from a single-loop polling architecture to a **Preemptive Multitasking Model**. We are refactoring the codebase into isolated, high-reliability tasks.
 The purpose of this branch is to experimentally add the following features without damaging the main branch:
 
-* FreeRTOS integration[✅]
-* PWM output via PIO (resetting servo jitter)[largely completed(✅)]
-* sensor reading via DMA, watchdog timer[⏳]
-* failsafe & heartbeat mechanism[❌]
-* MAVLink parser (works even without zero, waits for serial port), and blackbox logger (via UART).[❌]
+| Feature | Status |
+| --- | --- |
+| FreeRTOS integration | ✅ |
+| PWM output via PIO (resetting servo jitter)| largely completed(✅) |
+| ensor reading via DMA, watchdog timer | ⏳ |
+| failsafe & heartbeat mechanism | 📅 |
+| MAVLink parser (works even without zero, waits for serial port), and blackbox logger (via UART) | 📅 |
+
 
 
 ### Core Task Structure
