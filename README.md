@@ -1,11 +1,8 @@
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-Compatible-orange?style=for-the-badge&logo=platformio&logoColor=white)
 ![RP2040](https://img.shields.io/badge/Platform-RP2040-7546C6?style=for-the-badge&logo=raspberrypi&logoColor=white)
-
 ![C++](https://img.shields.io/badge/Language-C++-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 ![MAVLink](https://img.shields.io/badge/Protocol-MAVLink-red?style=for-the-badge)
-
 ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-0.1.0-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 # AeroPico FC: Raspberry Pi Pico Fixed-Wing Flight Controller
 
