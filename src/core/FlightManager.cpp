@@ -12,6 +12,7 @@ void FlightManager::update() {
     performSensorFusion();
     rx.update();
 
+
     SensorBuffer buf = sensors.getLatest();
 
     mutex_enter_blocking(&_mutex);
@@ -31,6 +32,7 @@ void FlightManager::update() {
         _rudder   = rx.getChannel(RC_YAW_CHANNEL);
     }
     mutex_exit(&_mutex);
+    updateArmDisarm(_throttle, _rudder);
 }
 
 void FlightManager::performSensorFusion() {
@@ -116,4 +118,33 @@ uint16_t FlightManager::getRudder() {
     uint16_t v = _rudder;
     mutex_exit(&_mutex);
     return v;
+}
+void FlightManager::updateArmDisarm(uint16_t throttle, uint16_t rudder) {
+    uint32_t now = millis();
+
+    if (!_armed) {
+        // ARM: throttle aşağı + rudder sağ, 1 saniye tut
+        if (throttle < ARM_THROTTLE_MAX && rudder > ARM_RUDDER_MIN) {
+            if (_armHoldStart == 0) _armHoldStart = now;
+            if (now - _armHoldStart >= ARM_HOLD_MS) {
+                _armed = true;
+                _armHoldStart = 0;
+                Serial.println("[ARM] Sistem arm edildi!");
+            }
+        } else {
+            _armHoldStart = 0;
+        }
+    } else {
+        // DISARM: throttle aşağı + rudder sol, 1 saniye tut
+        if (throttle < ARM_THROTTLE_MAX && rudder < DISARM_RUDDER_MAX) {
+            if (_disarmHoldStart == 0) _disarmHoldStart = now;
+            if (now - _disarmHoldStart >= ARM_HOLD_MS) {
+                _armed = false;
+                _disarmHoldStart = 0;
+                Serial.println("[ARM] Sistem disarm edildi!");
+            }
+        } else {
+            _disarmHoldStart = 0;
+        }
+    }
 }

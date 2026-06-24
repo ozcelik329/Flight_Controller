@@ -57,6 +57,10 @@ void SystemManager::core1_entry() {
         // Gerçek dt: bir önceki tick'ten bu yana geçen süre
         float dt = (float)LOOP_TIME / 1000000.0f;
         next_tick += LOOP_TIME;
+        if (!flightManager.isArmed()) {
+            writeMotors(PWM_MIN, PWM_NEUTRAL, PWM_NEUTRAL, PWM_NEUTRAL);
+            continue;
+        }
 
         // RC girişlerini aç sınıra çevir
         float targetRoll    = mapFloat(flightManager.getAileron(),  1000.0f, 2000.0f, -MAX_ROLL_ANGLE,  MAX_ROLL_ANGLE);
