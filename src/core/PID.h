@@ -1,10 +1,12 @@
 #ifndef PID_H
 #define PID_H
 
+#include <Arduino.h>
+
 class PID {
   public:
     PID(float kp, float ki, float kd);
-    float compute(float setpoint, float measured_value, float dt);
+    float __not_in_flash_func(compute)(float setpoint, float measured_value, float dt);
     void reset();
 
   private:

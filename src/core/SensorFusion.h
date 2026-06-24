@@ -2,16 +2,19 @@
 #define SENSOR_FUSION_H
 
 #include <Arduino.h>
+#include "pico/platform.h"
 
 class SensorFusion {
   public:
     SensorFusion();
     void init(float beta = 0.1f);
-    void update(float gx, float gy, float gz,
-                float ax, float ay, float az,
-                float mx, float my, float mz);
-    void updateIMU(float gx, float gy, float gz,
-                   float ax, float ay, float az);
+
+    void __not_in_flash_func(update)(float gx, float gy, float gz,
+                                     float ax, float ay, float az,
+                                     float mx, float my, float mz);
+
+    void __not_in_flash_func(updateIMU)(float gx, float gy, float gz,
+                                        float ax, float ay, float az);
 
     float getRoll() const;
     float getPitch() const;
@@ -23,7 +26,7 @@ class SensorFusion {
     float beta;
     uint32_t lastUpdate;
 
-    void computeAngles();
+    void __not_in_flash_func(computeAngles)();
     static float invSqrt(float x);
 };
 
