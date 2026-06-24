@@ -27,26 +27,22 @@ void taskFlight(void* pvParameters) {
 
 void taskTelemetry(void* pvParameters) {
     for (;;) {
-        mavlink.update();
+        mavlink.update();  // Tüm stream'ler burada yönetiliyor
 
-        float roll  = flightManager.getRoll();
-        float pitch = flightManager.getPitch();
-        float yaw   = flightManager.getYaw();
-        float gx    = flightManager.getGyroX();
-        float gy    = flightManager.getGyroY();
-        float gz    = flightManager.getGyroZ();
-        uint16_t thr = flightManager.getThrottle();
-        uint16_t ail = flightManager.getAileron();
-        uint16_t ele = flightManager.getElevator();
-        uint16_t rud = flightManager.getRudder();
-
-        mavlink.sendAttitude(roll, pitch, yaw, gx, gy, gz);
-        mavlink.sendRCChannels(ail, ele, thr, rud);
-        mavlink.sendSysStatus(true, false);
-
-        // Blackbox: 50 Hz
-        blackbox.log(roll, pitch, yaw, gx, gy, gz,
-                     thr, ail, ele, rud, false);
+        // Blackbox: 50 Hz — bağımsız olarak devam eder
+        blackbox.log(
+            flightManager.getRoll(),
+            flightManager.getPitch(),
+            flightManager.getYaw(),
+            flightManager.getGyroX(),
+            flightManager.getGyroY(),
+            flightManager.getGyroZ(),
+            flightManager.getThrottle(),
+            flightManager.getAileron(),
+            flightManager.getElevator(),
+            flightManager.getRudder(),
+            false
+        );
 
         vTaskDelay(pdMS_TO_TICKS(20)); // 50 Hz
     }

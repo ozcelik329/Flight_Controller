@@ -8,22 +8,53 @@ void MavlinkHandler::init(uint32_t baud) {
 }
 
 void MavlinkHandler::update() {
-    // Gelen byte'ları parse et
     while (MAV_SERIAL.available()) {
         uint8_t byte = MAV_SERIAL.read();
         _parse(byte);
     }
 
-    // ESP32 heartbeat timeout kontrolü — 3 saniye gelmezse ölü say
-    if (_esp32Alive && (millis() - _lastESP32Heartbeat > 3000)) {
+    uint32_t now = millis();
+
+    // ESP32 heartbeat timeout — 3 saniye
+    if (_esp32Alive && (now - _lastESP32Heartbeat > 3000)) {
         _esp32Alive = false;
         Serial.println("[MAVLINK] ESP32 baglantisi kesildi!");
     }
 
-    // Heartbeat gönder — 1 Hz
-    if (millis() - _lastHeartbeatSent >= 1000) {
-        _lastHeartbeatSent = millis();
+    // Heartbeat — 1 Hz
+    if (now - _lastHeartbeatSent >= STREAM_HEARTBEAT_MS) {
+        _lastHeartbeatSent = now;
         sendHeartbeat();
+    }
+
+    // Attitude — 10 Hz
+    if (now - _lastAttitudeSent >= STREAM_ATTITUDE_MS) {
+        _lastAttitudeSent = now;
+        sendAttitude(
+            flightManager.getRoll(),
+            flightManager.getPitch(),
+            flightManager.getYaw(),
+            flightManager.getGyroX(),
+            flightManager.getGyroY(),
+            flightManager.getGyroZ()
+        );
+    }
+
+    // RC Channels — 5 Hz
+    if (now - _lastRCSent >= STREAM_RC_MS) {
+        _lastRCSent = now;
+        sendRCChannels(
+            flightManager.getAileron(),
+            flightManager.getElevator(),
+            flightManager.getThrottle(),
+            flightManager.getRudder()
+        );
+    }
+
+    // SYS_STATUS — 2 Hz
+    if (now - _lastSysStatusSent >= STREAM_SYS_STATUS_MS) {
+        _lastSysStatusSent = now;
+        sendSysStatus(flightManager.isArmed(), false);
     }
 }
 
