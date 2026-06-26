@@ -25,6 +25,7 @@ class FlightManager {
   public:
     void init();
     void update();
+    FlightData getLatestData();
 
     float getRoll();
     float getPitch();
@@ -53,7 +54,7 @@ class FlightManager {
     uint32_t _armHoldStart    = 0;
     uint32_t _disarmHoldStart = 0;
 
-    void performSensorFusion();
+    void performSensorFusion(const SensorBuffer& buf);
     void updateArmDisarm(uint16_t throttle, uint16_t rudder);
 };
 

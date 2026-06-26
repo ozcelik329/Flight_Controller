@@ -27,16 +27,18 @@ void MavlinkHandler::update() {
         sendHeartbeat();
     }
 
+    FlightData flightData = flightManager.getLatestData();
+
     // Attitude — 10 Hz
     if (now - _lastAttitudeSent >= STREAM_ATTITUDE_MS) {
         _lastAttitudeSent = now;
         sendAttitude(
-            flightManager.getRoll(),
-            flightManager.getPitch(),
-            flightManager.getYaw(),
-            flightManager.getGyroX(),
-            flightManager.getGyroY(),
-            flightManager.getGyroZ()
+            flightData.roll,
+            flightData.pitch,
+            flightData.yaw,
+            flightData.gyroX,
+            flightData.gyroY,
+            flightData.gyroZ
         );
     }
 
@@ -44,10 +46,10 @@ void MavlinkHandler::update() {
     if (now - _lastRCSent >= STREAM_RC_MS) {
         _lastRCSent = now;
         sendRCChannels(
-            flightManager.getAileron(),
-            flightManager.getElevator(),
-            flightManager.getThrottle(),
-            flightManager.getRudder()
+            flightData.aileron,
+            flightData.elevator,
+            flightData.throttle,
+            flightData.rudder
         );
     }
 

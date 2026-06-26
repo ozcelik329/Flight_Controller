@@ -4,6 +4,7 @@
 #include "../drivers/Output.h"
 #include "../def.h"
 #include "PID.h"
+#include <pico/time.h>
 
 static PID rollAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
 static PID pitchAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
@@ -49,8 +50,10 @@ void SystemManager::core1_entry() {
     while (true) {
         uint32_t now = micros();
 
-        // Zamanlanmış tick'i bekle (busy-wait yerine sleep)
-        if ((int32_t)(now - next_tick) < 0) {
+        // Zamanlanmış tick'i bekle
+        int32_t diff = (int32_t)(next_tick - now);
+        if (diff > 0) {
+            sleep_us(diff);
             continue;
         }
 
@@ -62,28 +65,30 @@ void SystemManager::core1_entry() {
             continue;
         }
 
+        FlightData flightData = flightManager.getLatestData();
+
         // RC girişlerini aç sınıra çevir
-        float targetRoll    = mapFloat(flightManager.getAileron(),  1000.0f, 2000.0f, -MAX_ROLL_ANGLE,  MAX_ROLL_ANGLE);
-        float targetPitch   = mapFloat(flightManager.getElevator(), 1000.0f, 2000.0f, -MAX_PITCH_ANGLE, MAX_PITCH_ANGLE);
-        float targetYawRate = mapFloat(flightManager.getRudder(),   1000.0f, 2000.0f, -MAX_YAW_RATE,    MAX_YAW_RATE);
+        float targetRoll    = mapFloat(flightData.aileron,  1000.0f, 2000.0f, -MAX_ROLL_ANGLE,  MAX_ROLL_ANGLE);
+        float targetPitch   = mapFloat(flightData.elevator, 1000.0f, 2000.0f, -MAX_PITCH_ANGLE, MAX_PITCH_ANGLE);
+        float targetYawRate = mapFloat(flightData.rudder,   1000.0f, 2000.0f, -MAX_YAW_RATE,    MAX_YAW_RATE);
 
         // Cascaded PID: açı → açısal hız
-        float desiredRollRate  = rollAnglePID.compute(targetRoll,  flightManager.getRoll(),  dt);
-        float desiredPitchRate = pitchAnglePID.compute(targetPitch, flightManager.getPitch(), dt);
+        float desiredRollRate  = rollAnglePID.compute(targetRoll,  flightData.roll,  dt);
+        float desiredPitchRate = pitchAnglePID.compute(targetPitch, flightData.pitch, dt);
 
         // Açısal hız → servo düzeltmesi
-        float rollCorr  = rollRatePID.compute(desiredRollRate,  flightManager.getGyroX(), dt);
-        float pitchCorr = pitchRatePID.compute(desiredPitchRate, flightManager.getGyroY(), dt);
-        float yawCorr   = yawRatePID.compute(targetYawRate,     flightManager.getGyroZ(), dt);
+        float rollCorr  = rollRatePID.compute(desiredRollRate,  flightData.gyroX, dt);
+        float pitchCorr = pitchRatePID.compute(desiredPitchRate, flightData.gyroY, dt);
+        float yawCorr   = yawRatePID.compute(targetYawRate,     flightData.gyroZ, dt);
 
         mixer.compute(
-            flightManager.getThrottle(),
+            flightData.throttle,
             rollCorr,
             pitchCorr,
             yawCorr,
-            flightManager.getAileron(),
-            flightManager.getElevator(),
-            flightManager.getRudder()
+            flightData.aileron,
+            flightData.elevator,
+            flightData.rudder
         );
     }
 }

@@ -8,10 +8,9 @@ void FlightManager::init() {
 
 void FlightManager::update() {
     sensors.update();
-    performSensorFusion();
-    rx.update();
-
     SensorBuffer buf = sensors.getLatest();
+    performSensorFusion(buf);
+    rx.update();
 
     FlightData data;
     data.gyroX = buf.gx;
@@ -40,9 +39,19 @@ void FlightManager::update() {
     _ringBuf.push(data);  // Lock-free yazma
 }
 
-void FlightManager::performSensorFusion() {
-    SensorBuffer buf = sensors.getLatest();
+static FlightData _getLatest(RingBuffer<FlightData, 4>& buf, FlightData& cache) {
+    FlightData tmp;
+    while (buf.pop(tmp)) {
+        cache = tmp;  // En güncel veriyi al
+    }
+    return cache;
+}
 
+FlightData FlightManager::getLatestData() {
+    return _getLatest(_ringBuf, _latest);
+}
+
+void FlightManager::performSensorFusion(const SensorBuffer& buf) {
     fusion.setTemperature(buf.tempC);
 
     float gx = buf.gx * DEG_TO_RAD;
@@ -54,15 +63,6 @@ void FlightManager::performSensorFusion() {
     #else
         fusion.updateIMU(gx, gy, gz, buf.ax, buf.ay, buf.az);
     #endif
-}
-
-// Core 1 tarafında çağrılır — lock-free okuma
-static FlightData _getLatest(RingBuffer<FlightData, 4>& buf, FlightData& cache) {
-    FlightData tmp;
-    while (buf.pop(tmp)) {
-        cache = tmp;  // En güncel veriyi al
-    }
-    return cache;
 }
 
 float    FlightManager::getRoll()     { return _getLatest(_ringBuf, _latest).roll; }
