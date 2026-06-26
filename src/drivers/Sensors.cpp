@@ -1,4 +1,6 @@
 #include "Sensors.h"
+#include "../utils/Logger.h"
+#include "../utils/BootLogger.h"
 
 // Pico SDK i2c instance — Wire'ın altındaki donanım
 // Wire → i2c0 (SDA=4, SCL=5 config.h'da tanımlı)
@@ -13,6 +15,7 @@ void SensorManager::init() {
     mutex_init(&_mutex);
     _buf[0] = {};
     _buf[1] = {};
+    _imuAvailable = false;
 
     // I2C başlat — Wire yerine doğrudan SDK
     i2c_init(_i2c, 400000);
@@ -20,6 +23,28 @@ void SensorManager::init() {
     gpio_set_function(PIN_SCL, GPIO_FUNC_I2C);
     gpio_pull_up(PIN_SDA);
     gpio_pull_up(PIN_SCL);
+    BootLogger::ok("I2C");
+
+    delay(50);
+
+    uint8_t whoami_reg = 0x75;
+    uint8_t whoami = 0;
+    int writeResult = i2c_write_blocking(_i2c, MPU6050_ADDR, &whoami_reg, 1, true);
+    if (writeResult != 1) {
+        BootLogger::fail("MPU6050", "I2C write failed during WHO_AM_I");
+        Logger::logError("[SENSOR] MPU6050 bulunamadi, I2C yazma hatasi.");
+        return;
+    }
+
+    int readResult = i2c_read_blocking(_i2c, MPU6050_ADDR, &whoami, 1, false);
+    if (readResult != 1 || whoami != 0x68) {
+        BootLogger::fail("MPU6050", "WHO_AM_I mismatch or no response");
+        Logger::logError("[SENSOR] MPU6050 yanit vermedi veya beklenmeyen ID.");
+        return;
+    }
+
+    _imuAvailable = true;
+    BootLogger::ok("MPU6050");
 
     // MPU6050 uyandır
     _mpu_write_reg(MPU6050_REG_PWR, 0x00);
@@ -32,43 +57,69 @@ void SensorManager::init() {
     // DLPF: 21Hz bant genişliği
     _mpu_write_reg(MPU6050_REG_DLPF, 0x04);
 
-    Serial.println("[SENSOR] MPU6050 (ham I2C+DMA) hazir.");
+    Logger::log("[SENSOR] MPU6050 (ham I2C+DMA) hazir.");
 
     // DMA kanalı al
-    _dma_chan = dma_claim_unused_channel(true);
+    _dma_chan = dma_claim_unused_channel(false);
+    if (_dma_chan < 0) {
+        BootLogger::fail("DMA", "No unused DMA channel available");
+        Logger::logError("[SENSOR] DMA kanali bulunamadi.");
+    } else {
+        BootLogger::ok("DMA");
+    }
 
-    dma_channel_config cfg = dma_channel_get_default_config(_dma_chan);
-    channel_config_set_transfer_data_size(&cfg, DMA_SIZE_8);
-    channel_config_set_read_increment(&cfg, false);   // I2C RX FIFO sabit adres
-    channel_config_set_write_increment(&cfg, true);   // buffer'a sırayla yaz
-    channel_config_set_dreq(&cfg, i2c_get_dreq(_i2c, false)); // I2C RX dreq
+    if (_dma_chan >= 0) {
+        dma_channel_config cfg = dma_channel_get_default_config(_dma_chan);
+        channel_config_set_transfer_data_size(&cfg, DMA_SIZE_8);
+        channel_config_set_read_increment(&cfg, false);   // I2C RX FIFO sabit adres
+        channel_config_set_write_increment(&cfg, true);   // buffer'a sırayla yaz
+        channel_config_set_dreq(&cfg, i2c_get_dreq(_i2c, false)); // I2C RX dreq
 
-    dma_channel_configure(
-        _dma_chan,
-        &cfg,
-        _dma_buf,                          // hedef: RAM buffer
-        &i2c_get_hw(_i2c)->data_cmd,       // kaynak: I2C RX FIFO
-        MPU6050_RAW_LEN,
-        false  // henüz başlatma
-    );
+        dma_channel_configure(
+            _dma_chan,
+            &cfg,
+            _dma_buf,                          // hedef: RAM buffer
+            &i2c_get_hw(_i2c)->data_cmd,       // kaynak: I2C RX FIFO
+            MPU6050_RAW_LEN,
+            false  // henüz başlatma
+        );
+    }
 
     #ifdef USE_GY87
         // HMC5883L ve BMP085 Wire üzerinden — DMA değil
         Wire.begin();
+        delay(50);
+
         hasMag = mag.begin();
-        if (!hasMag) Serial.println("[SENSOR] HMC5883L bulunamadi!");
-        else         Serial.println("[SENSOR] HMC5883L hazir.");
+        if (!hasMag) {
+            BootLogger::fail("MAG", "HMC5883L not detected");
+            Logger::logError("[SENSOR] HMC5883L bulunamadi!");
+        } else {
+            BootLogger::ok("MAG");
+            Logger::log("[SENSOR] HMC5883L hazir.");
+        }
 
         hasBaro = bmp.begin();
-        if (!hasBaro) Serial.println("[SENSOR] BMP085 bulunamadi!");
-        else          Serial.println("[SENSOR] BMP085 hazir.");
+        if (!hasBaro) {
+            BootLogger::fail("BARO", "BMP085 not detected");
+            Logger::logError("[SENSOR] BMP085 bulunamadi!");
+        } else {
+            BootLogger::ok("BARO");
+            Logger::log("[SENSOR] BMP085 hazir.");
+        }
     #endif
 
     // İlk DMA okumayı başlat
-    _mpu_start_dma_read();
+    if (_dma_chan >= 0) {
+        _mpu_start_dma_read();
+    }
 }
 
 void SensorManager::_mpu_start_dma_read() {
+    if (!_imuAvailable) {
+        return;
+    }
+
     // Register adresini yaz, sonra okuma isteği gönder
     i2c_write_blocking(_i2c, MPU6050_ADDR, &_reg_addr, 1, true); // repeated start
 
@@ -129,6 +180,10 @@ void __not_in_flash_func(SensorManager::_mpu_parse)(SensorBuffer& buf) {
 }
 
 void SensorManager::update() {
+    if (!_imuAvailable) {
+        return;
+    }
+
     // DMA tamamlandıysa parse et, yeni okuma başlat
     if (!_mpu_dma_ready()) return;  // henüz hazır değil, bekle
 
