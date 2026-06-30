@@ -180,4 +180,4 @@ This project is **proprietary software**. The source code is provided for educat
 *For commercial licensing inquiries, please contact: fatihemreozcelik@gmail.com
 ___
 *Developed by Muhammed Fatih Emre Özçelik*
-*Copyright © 2026 Muhammed Fatih Emre Özçelik. All rights reserved.*
+
