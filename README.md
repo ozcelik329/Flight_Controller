@@ -2,7 +2,7 @@
 ![RP2040](https://img.shields.io/badge/Platform-RP2040-7546C6)
 ![C++](https://img.shields.io/badge/Language-C++-00599C)
 ![MAVLink](https://img.shields.io/badge/Protocol-MAVLink-red)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-Proprietary-yellow)
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/0a66fec3-2c89-4f69-b286-e269c3606a84" width="658" height="298" />
@@ -10,7 +10,12 @@
 ## ✈️ AeroPico FC : Fixed-Wing Flight Controller
 
 
-> ⚠️ **COPYRIGHT NOTICE** This project is proprietary. It is for personal/educational study only. Commercial use or unauthorized redistribution is strictly prohibited.
+## ⚠️ Intellectual Property Notice
+**Copyright © 2026 Muhammed Fatih Emre Özçelik. All Rights Reserved.**
+
+This project is **proprietary software**. The source code is provided for educational, non-commercial study, and evaluation purposes only. Any commercial use, redistribution, modification, or inclusion of this code in other software/products is **strictly prohibited** without explicit written permission from the author. 
+
+*For commercial licensing inquiries, please contact: fatihemreozccelik@gmail.com
 
 **AeroPico FC** is an open-source flight controller firmware for fixed-wing UAVs, built on the **RP2040 (Raspberry Pi Pico)**. It uses the chip's dual-core architecture to keep sensor fusion and flight control on separate cores — the same separation professional autopilots rely on, now accessible to everyone. 🚀
 
