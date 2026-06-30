@@ -9,14 +9,6 @@
 </div>
 ## ✈️ AeroPico FC : Fixed-Wing Flight Controller
 
-
-## Intellectual Property Notice
-**Copyright © 2026 Muhammed Fatih Emre Özçelik. All Rights Reserved.**
-
-This project is **proprietary software**. The source code is provided for educational, non-commercial study, and evaluation purposes only. Any commercial use, redistribution, modification, or inclusion of this code in other software/products is **strictly prohibited** without explicit written permission from the author. 
-
-*For commercial licensing inquiries, please contact: fatihemreozccelik@gmail.com
-
 **AeroPico FC** is an open-source flight controller firmware for fixed-wing UAVs, built on the **RP2040 (Raspberry Pi Pico)**. It uses the chip's dual-core architecture to keep sensor fusion and flight control on separate cores — the same separation professional autopilots rely on, now accessible to everyone. 🚀
 
 Whether you are a hobbyist building your first fixed-wing or a developer researching custom autopilot stacks, AeroPico FC gives you a clean, readable codebase you can actually understand and extend. 🛠️
@@ -178,6 +170,12 @@ The core firmware (located in `firmware/`) is strictly optimized for flight stab
 Issues and pull requests are welcome. If you are new to embedded systems and want to understand how a flight controller works from the ground up, this codebase is a good place to start — open an issue and ask questions freely! 💡
 
 ---
+## Intellectual Property Notice
+**Copyright © 2026 Muhammed Fatih Emre Özçelik. All Rights Reserved.**
 
+This project is **proprietary software**. The source code is provided for educational, non-commercial study, and evaluation purposes only. Any commercial use, redistribution, modification, or inclusion of this code in other software/products is **strictly prohibited** without explicit written permission from the author. 
+
+*For commercial licensing inquiries, please contact: fatihemreozcelik@gmail.com
+___
 *Developed by Muhammed Fatih Emre Özçelik*
 *Copyright © 2026 Muhammed Fatih Emre Özçelik. All rights reserved.*
