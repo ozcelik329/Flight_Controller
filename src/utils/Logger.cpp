@@ -1,16 +1,16 @@
 #include "Logger.h"
+#include "USBManager.h"
 #include <Arduino.h>
 
 void Logger::init() {
-    // Serial.begin main.cpp'de zaten açılıyor; burada tekrar çağırmıyoruz.
-    Serial.println("[Logger] Baslatildi.");
+    USBManager::println("[Logger] Baslatildi.");
 }
 
 void Logger::log(const char* message) {
-    Serial.println(message);
+    USBManager::println(message);
 }
 
 void Logger::logError(const char* error) {
-    Serial.print("[HATA] ");
-    Serial.println(error);
+    USBManager::println("[HATA] ");
+    USBManager::println(error);
 }

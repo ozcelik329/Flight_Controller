@@ -1,17 +1,18 @@
 #include "BootLogger.h"
+#include "USBManager.h"
 
 void BootLogger::printBanner() {
-    Serial.println("==============================");
-    Serial.println(" AeroPico FC v0.2.0");
-    Serial.println(" Target : Raspberry Pi Pico 2");
-    Serial.println(" CPU    : RP2350");
-    Serial.println("==============================");
+    USBManager::println("==============================");
+    USBManager::println(" AeroPico FC v0.2.0");
+    USBManager::println(" Target : Raspberry Pi Pico 2");
+    USBManager::println(" CPU    : RP2350");
+    USBManager::println("==============================");
 }
 
 void BootLogger::printReadyMessage() {
-    Serial.println();
-    Serial.println("System Ready.");
-    Serial.println("Loop Frequency: 500Hz");
+    USBManager::println("");
+    USBManager::println("System Ready.");
+    USBManager::println("Loop Frequency: 500Hz");
 }
 
 void BootLogger::printHealthReport(
@@ -25,42 +26,42 @@ void BootLogger::printHealthReport(
     bool failsafe,
     uint32_t heapBytes
 ) {
-    Serial.println();
-    Serial.println("========================");
-    Serial.println("SYSTEM HEALTH");
-    Serial.println("========================");
-    Serial.printf("CPU Temp........%s\n", "N/A");
-    Serial.printf("Loop Rate.......%lu Hz\n", loopRateHz);
-    Serial.printf("IMU..............%s\n", imuOk ? "OK" : "FAIL");
-    Serial.printf("Barometer........%s\n", baroOk ? "OK" : "FAIL");
-    Serial.printf("Compass..........%s\n", magOk ? "OK" : "FAIL");
-    Serial.printf("Receiver.........%s\n", receiverOk ? "OK" : "FAIL");
-    Serial.printf("GPS..............Not Connected\n");
-    Serial.printf("DMA..............%s\n", dmaOk ? "OK" : "FAIL");
-    Serial.printf("Heap.............%lu KB\n", heapBytes / 1024);
-    Serial.printf("Failsafe.........%s\n", failsafe ? "ON" : "OFF");
-    Serial.printf("Armed............%s\n", armed ? "YES" : "NO");
-    Serial.println("Flight Mode......MANUAL");
+    USBManager::println("");
+    USBManager::println("========================");
+    USBManager::println("SYSTEM HEALTH");
+    USBManager::println("========================");
+    USBManager::printf("CPU Temp........%s\n", "N/A");
+    USBManager::printf("Loop Rate.......%lu Hz\n", loopRateHz);
+    USBManager::printf("IMU..............%s\n", imuOk ? "OK" : "FAIL");
+    USBManager::printf("Barometer........%s\n", baroOk ? "OK" : "FAIL");
+    USBManager::printf("Compass..........%s\n", magOk ? "OK" : "FAIL");
+    USBManager::printf("Receiver.........%s\n", receiverOk ? "OK" : "FAIL");
+    USBManager::printf("GPS..............Not Connected\n");
+    USBManager::printf("DMA..............%s\n", dmaOk ? "OK" : "FAIL");
+    USBManager::printf("Heap.............%lu KB\n", heapBytes / 1024);
+    USBManager::printf("Failsafe.........%s\n", failsafe ? "ON" : "OFF");
+    USBManager::printf("Armed............%s\n", armed ? "YES" : "NO");
+    USBManager::println("Flight Mode......MANUAL");
 }
 
 void BootLogger::ok(const char* name) {
-    Serial.printf("[BOOT] %-18s OK\n", name);
+    USBManager::printf("[BOOT] %-18s OK\n", name);
 }
 
 void BootLogger::okWithValue(const char* name, const char* value) {
-    Serial.printf("[BOOT] %-18s OK (%s)\n", name, value);
+    USBManager::printf("[BOOT] %-18s OK (%s)\n", name, value);
 }
 
 void BootLogger::fail(const char* name, const char* reason) {
-    Serial.printf("[BOOT] %-18s FAILED\n", name);
-    Serial.printf("       %s\n", reason);
+    USBManager::printf("[BOOT] %-18s FAILED\n", name);
+    USBManager::printf("       %s\n", reason);
 }
 
 void BootLogger::warn(const char* name, const char* reason) {
-    Serial.printf("[BOOT] %-18s WARN\n", name);
-    Serial.printf("       %s\n", reason);
+    USBManager::printf("[BOOT] %-18s WARN\n", name);
+    USBManager::printf("       %s\n", reason);
 }
 
 void BootLogger::info(const char* text) {
-    Serial.println(text);
+    USBManager::println(text);
 }

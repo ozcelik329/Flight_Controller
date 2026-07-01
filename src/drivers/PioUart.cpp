@@ -1,4 +1,5 @@
 #include "PioUart.h"
+#include "../utils/Logger.h"
 
 PioUart espUart;
 
@@ -33,7 +34,7 @@ void PioUart::init(uint32_t baud) {
     pio_sm_init(_pio, _sm_rx, _offset_rx, &rx_cfg);
     pio_sm_set_enabled(_pio, _sm_rx, true);
 
-    Serial.println("[PIO UART] ESP32-CAM baglantisi hazir.");
+    Logger::log("[PIO UART] ESP32-CAM baglantisi hazir.");
 }
 
 void PioUart::write(const uint8_t* buf, size_t len) {

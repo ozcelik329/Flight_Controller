@@ -1,4 +1,5 @@
 #include "MavlinkHandler.h"
+#include "../utils/Logger.h"
 
 MavlinkHandler mavlink;
 
@@ -13,7 +14,7 @@ static FlightDataSnapshot defaultFlightData() {
 
 void MavlinkHandler::init(uint32_t baud) {
     espUart.init(baud);
-    Serial.println("[MAVLINK] Baslatildi.");
+    Logger::log("[MAVLINK] Baslatildi.");
 }
 
 void MavlinkHandler::setFlightDataProvider(FlightDataProvider provider) {
@@ -39,7 +40,7 @@ void MavlinkHandler::update() {
     // ESP32 heartbeat timeout — 3 saniye
     if (_esp32Alive && (now - _lastESP32Heartbeat > 3000)) {
         _esp32Alive = false;
-        Serial.println("[MAVLINK] ESP32 baglantisi kesildi!");
+        Logger::log("[MAVLINK] ESP32 baglantisi kesildi!");
     }
 
     // Heartbeat — 1 Hz
@@ -93,7 +94,7 @@ void MavlinkHandler::_handleMessage(mavlink_message_t& msg) {
             _lastESP32Heartbeat = millis();
             if (!_esp32Alive) {
                 _esp32Alive = true;
-                Serial.println("[MAVLINK] ESP32 baglandi.");
+                Logger::log("[MAVLINK] ESP32 baglandi.");
             }
             break;
         }
@@ -115,12 +116,12 @@ void MavlinkHandler::_handleMessage(mavlink_message_t& msg) {
             if (anyOverride) {
                 if (_rcOverrideHandler) {
                     _rcOverrideHandler(ch1, ch2, ch3, ch4);
-                    Serial.println("[MAVLINK] RC override applied.");
+                    Logger::log("[MAVLINK] RC override applied.");
                 }
             } else {
                 if (_rcClearHandler) {
                     _rcClearHandler();
-                    Serial.println("[MAVLINK] RC override cleared.");
+                    Logger::log("[MAVLINK] RC override cleared.");
                 }
             }
             break;

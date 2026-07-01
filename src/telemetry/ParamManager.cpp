@@ -1,12 +1,13 @@
 #include "ParamManager.h"
+#include "../utils/Logger.h"
 
 #ifdef MAVLINK_PARAMS_ENABLED
 
 ParamManager paramManager;
 
 void ParamManager::init() {
-    Serial.println("[PARAMS] Parametre yoneticisi baslatildi.");
-    Serial.printf("[PARAMS] %d parametre yuklu.\n", PARAM_COUNT);
+    Logger::log("[PARAMS] Parametre yoneticisi baslatildi.");
+    Logger::log("[PARAMS] parametre yoneticisi hazir.");
 }
 
 void ParamManager::handleMessage(const mavlink_message_t& msg) {
@@ -49,7 +50,7 @@ void ParamManager::sendParam(uint8_t index) {
 }
 
 void ParamManager::_handleParamRequestList(const mavlink_message_t& msg) {
-    Serial.println("[PARAMS] GCS parametre listesi istedi.");
+    Logger::log("[PARAMS] GCS parametre listesi istedi.");
     sendAll();
 }
 
@@ -65,7 +66,7 @@ void ParamManager::_handleParamSet(const mavlink_message_t& msg) {
                                      _params[i].maxVal);
             _params[i].value = newVal;
 
-            Serial.printf("[PARAMS] %s = %.4f\n", _params[i].name, newVal);
+            Logger::log("[PARAMS] parametre guncellendi.");
 
             // Onay olarak geri gönder
             sendParam(i);
@@ -73,7 +74,7 @@ void ParamManager::_handleParamSet(const mavlink_message_t& msg) {
         }
     }
 
-    Serial.println("[PARAMS] Bilinmeyen parametre!");
+    Logger::log("[PARAMS] Bilinmeyen parametre!");
 }
 
 void ParamManager::_sendPacket(mavlink_message_t& msg) {

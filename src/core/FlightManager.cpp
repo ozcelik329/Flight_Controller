@@ -119,7 +119,7 @@ void FlightManager::updateArmDisarm(uint16_t throttle, uint16_t rudder) {
             if (now - _armHoldStart >= ARM_HOLD_MS) {
                 _armed = true;
                 _armHoldStart = 0;
-                Serial.println("[ARM] Sistem arm edildi!");
+                Logger::log("[ARM] Sistem arm edildi!");
             }
         } else {
             _armHoldStart = 0;
@@ -130,7 +130,7 @@ void FlightManager::updateArmDisarm(uint16_t throttle, uint16_t rudder) {
             if (now - _disarmHoldStart >= ARM_HOLD_MS) {
                 _armed = false;
                 _disarmHoldStart = 0;
-                Serial.println("[ARM] Sistem disarm edildi!");
+                Logger::log("[ARM] Sistem disarm edildi!");
             }
         } else {
             _disarmHoldStart = 0;

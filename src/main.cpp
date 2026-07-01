@@ -5,10 +5,12 @@
 #include <hardware/watchdog.h>
 #include "core/FlightManager.h"
 #include "core/SystemTimer.h"
+#include "core/HealthManager.h"
 #include "utils/Logger.h"
 #include "telemetry/MavlinkHandler.h"
 #include "telemetry/Blackbox.h"
 #include "utils/BootLogger.h"
+#include "utils/USBManager.h"
 
 FlightManager flightManager;
 
@@ -17,10 +19,7 @@ static volatile uint32_t g_lastLoopRateHz = 0;
 static volatile uint32_t g_lastHealthMs = 0;
 
 void waitForSerialConnection(uint32_t timeoutMs = 3000) {
-    uint32_t start = millis();
-    while (!Serial && (millis() - start < timeoutMs)) {
-        delay(10);
-    }
+    USBManager::init(115200, timeoutMs);
 }
 
 void taskSensor(void* pvParameters) {
@@ -85,14 +84,14 @@ void taskTelemetry(void* pvParameters) {
 }
 
 extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    Serial.printf("[FREERTOS] Stack overflow in %s\n", pcTaskName);
+    USBManager::printf("[FREERTOS] Stack overflow in %s\n", pcTaskName);
     watchdog_update();
     taskDISABLE_INTERRUPTS();
     while (true) { }
 }
 
 extern "C" void vApplicationMallocFailedHook(void) {
-    Serial.println("[FREERTOS] Malloc failed!");
+    USBManager::println("[FREERTOS] Malloc failed!");
     watchdog_update();
     taskDISABLE_INTERRUPTS();
     while (true) { }
@@ -117,9 +116,9 @@ static FlightDataSnapshot getFlightDataCallback() {
 }
 
 void setup() {
-    Serial.begin(115200);
     waitForSerialConnection();
 
+    HealthManager::init();
     BootLogger::printBanner();
     BootLogger::ok("USB");
 
@@ -157,6 +156,7 @@ void setup() {
     BootLogger::ok("MAVLink");
     BootLogger::ok("Blackbox");
     BootLogger::printReadyMessage();
+    HealthManager::update(500, true, true, USBManager::isConnected(), true, false, false, false, rp2040.getFreeHeap());
     BootLogger::printHealthReport(500, true, true, true, true, true, false, false, rp2040.getFreeHeap());
 
     watchdog_enable(WATCHDOG_TIMEOUT_MS, true);

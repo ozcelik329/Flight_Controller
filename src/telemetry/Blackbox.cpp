@@ -1,4 +1,5 @@
 #include "Blackbox.h"
+#include "../utils/Logger.h"
 
 Blackbox blackbox;
 
@@ -7,7 +8,7 @@ void Blackbox::init() {
     // ESP32'ye başlangıç sinyali gönder
     const char* header = "BB_START\n";
     espUart.write((const uint8_t*)header, strlen(header));
-    Serial.println("[BLACKBOX] Baslatildi.");
+    Logger::log("[BLACKBOX] Baslatildi.");
 }
 
 void Blackbox::log(float roll, float pitch, float yaw,
