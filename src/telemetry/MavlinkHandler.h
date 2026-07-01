@@ -4,11 +4,29 @@
 #include <Arduino.h>
 #include <common/mavlink.h>
 #include "../drivers/PioUart.h"
-#include "../core/FlightManager.h"
 
 #define MAV_SYSTEM_ID    1
 #define MAV_COMPONENT_ID MAV_COMP_ID_AUTOPILOT1
 #define MAV_SERIAL       espUart
+
+struct FlightDataSnapshot {
+    float roll;
+    float pitch;
+    float yaw;
+    float gyroX;
+    float gyroY;
+    float gyroZ;
+    uint16_t aileron;
+    uint16_t elevator;
+    uint16_t throttle;
+    uint16_t rudder;
+    bool armed;
+    bool failsafe;
+};
+
+typedef FlightDataSnapshot (*FlightDataProvider)();
+typedef void (*RCOverrideHandler)(uint16_t ch1, uint16_t ch2, uint16_t ch3, uint16_t ch4);
+typedef void (*RCClearHandler)();
 
 // Stream frekansları (ms)
 #define STREAM_HEARTBEAT_MS   1000  // 1 Hz
@@ -20,6 +38,10 @@ class MavlinkHandler {
   public:
     void init(uint32_t baud = 57600);
     void update();
+
+    void setFlightDataProvider(FlightDataProvider provider);
+    void setRCOverrideHandler(RCOverrideHandler handler);
+    void setRCClearHandler(RCClearHandler handler);
 
     void sendHeartbeat();
     void sendAttitude(float roll, float pitch, float yaw,
@@ -39,6 +61,9 @@ class MavlinkHandler {
 
     uint32_t _lastESP32Heartbeat  = 0;
     bool     _esp32Alive          = false;
+    FlightDataProvider _flightDataProvider = nullptr;
+    RCOverrideHandler _rcOverrideHandler   = nullptr;
+    RCClearHandler _rcClearHandler         = nullptr;
 
     // Stream zamanlayıcıları
     uint32_t _lastHeartbeatSent   = 0;

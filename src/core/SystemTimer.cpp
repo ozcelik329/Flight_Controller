@@ -4,6 +4,7 @@
 #include "../drivers/Output.h"
 #include "../def.h"
 #include "PID.h"
+#include <hardware/watchdog.h>
 #include <pico/time.h>
 
 static PID rollAnglePID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN);
@@ -73,13 +74,13 @@ void SystemManager::core1_entry() {
         float targetYawRate = mapFloat(flightData.rudder,   1000.0f, 2000.0f, -MAX_YAW_RATE,    MAX_YAW_RATE);
 
         // Cascaded PID: açı → açısal hız
-        float desiredRollRate  = rollAnglePID.compute(targetRoll,  flightData.roll,  dt);
-        float desiredPitchRate = pitchAnglePID.compute(targetPitch, flightData.pitch, dt);
+        float desiredRollRate  = rollAnglePID.compute(targetRoll,  flightData.roll,  dt, -300.0f, 300.0f);
+        float desiredPitchRate = pitchAnglePID.compute(targetPitch, flightData.pitch, dt, -300.0f, 300.0f);
 
         // Açısal hız → servo düzeltmesi
-        float rollCorr  = rollRatePID.compute(desiredRollRate,  flightData.gyroX, dt);
-        float pitchCorr = pitchRatePID.compute(desiredPitchRate, flightData.gyroY, dt);
-        float yawCorr   = yawRatePID.compute(targetYawRate,     flightData.gyroZ, dt);
+        float rollCorr  = rollRatePID.compute(desiredRollRate,  flightData.gyroX, dt, -300.0f, 300.0f);
+        float pitchCorr = pitchRatePID.compute(desiredPitchRate, flightData.gyroY, dt, -300.0f, 300.0f);
+        float yawCorr   = yawRatePID.compute(targetYawRate,     flightData.gyroZ, dt, -300.0f, 300.0f);
 
         mixer.compute(
             flightData.throttle,
@@ -90,5 +91,7 @@ void SystemManager::core1_entry() {
             flightData.elevator,
             flightData.rudder
         );
+
+        watchdog_update();
     }
 }

@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include <RP2040Support.h>
 #include <FreeRTOS.h>
 #include <task.h>
+#include <hardware/watchdog.h>
 #include "core/FlightManager.h"
 #include "core/SystemTimer.h"
 #include "utils/Logger.h"
@@ -73,12 +75,45 @@ void taskTelemetry(void* pvParameters) {
                 true,
                 flightManager.isArmed(),
                 false,
-                182000
+                rp2040.getFreeHeap()
             );
         }
 
+        watchdog_update();
         vTaskDelayUntil(&lastWakeTime, telemetryPeriod);
     }
+}
+
+extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    Serial.printf("[FREERTOS] Stack overflow in %s\n", pcTaskName);
+    watchdog_update();
+    taskDISABLE_INTERRUPTS();
+    while (true) { }
+}
+
+extern "C" void vApplicationMallocFailedHook(void) {
+    Serial.println("[FREERTOS] Malloc failed!");
+    watchdog_update();
+    taskDISABLE_INTERRUPTS();
+    while (true) { }
+}
+
+static FlightDataSnapshot getFlightDataCallback() {
+    FlightData latest = flightManager.getLatestData();
+    return FlightDataSnapshot{
+        latest.roll,
+        latest.pitch,
+        latest.yaw,
+        latest.gyroX,
+        latest.gyroY,
+        latest.gyroZ,
+        latest.aileron,
+        latest.elevator,
+        latest.throttle,
+        latest.rudder,
+        flightManager.isArmed(),
+        latest.failsafe
+    };
 }
 
 void setup() {
@@ -98,6 +133,13 @@ void setup() {
     Logger::log("Setup: 3/6 - system timer initialized");
 
     mavlink.init();
+    mavlink.setFlightDataProvider(getFlightDataCallback);
+    mavlink.setRCOverrideHandler([](uint16_t ch1, uint16_t ch2, uint16_t ch3, uint16_t ch4) {
+        flightManager.setRCOverride(ch1, ch2, ch3, ch4);
+    });
+    mavlink.setRCClearHandler([]() {
+        flightManager.clearRCOverride();
+    });
     Logger::log("Setup: 4/6 - mavlink initialized");
 
     blackbox.init();
@@ -115,7 +157,10 @@ void setup() {
     BootLogger::ok("MAVLink");
     BootLogger::ok("Blackbox");
     BootLogger::printReadyMessage();
-    BootLogger::printHealthReport(500, true, true, true, true, true, false, false, 182000);
+    BootLogger::printHealthReport(500, true, true, true, true, true, false, false, rp2040.getFreeHeap());
+
+    watchdog_enable(WATCHDOG_TIMEOUT_MS, true);
+    BootLogger::ok("Watchdog");
 
     BaseType_t sensorTaskCreated = xTaskCreateAffinitySet(
         taskSensor, "SensorTask",

@@ -133,6 +133,24 @@ void __not_in_flash_func(SensorFusion::updateIMU)(float gx, float gy, float gz,
     if (norm < 1e-6f) return;
     ax /= norm; ay /= norm; az /= norm;
 
+    // Madgwick 6-DOF accelerometer correction
+    float q0q0 = q0 * q0;
+    float q1q1 = q1 * q1;
+    float q2q2 = q2 * q2;
+    float q3q3 = q3 * q3;
+
+    float vx = 2.0f * (q1 * q3 - q0 * q2);
+    float vy = 2.0f * (q0 * q1 + q2 * q3);
+    float vz = q0q0 - q1q1 - q2q2 + q3q3;
+
+    float ex = (ay * vz - az * vy);
+    float ey = (az * vx - ax * vz);
+    float ez = (ax * vy - ay * vx);
+
+    gx += beta * ex;
+    gy += beta * ey;
+    gz += beta * ez;
+
     float qDot1 = 0.5f * (-q1 * gx - q2 * gy - q3 * gz);
     float qDot2 = 0.5f * ( q0 * gx + q2 * gz - q3 * gy);
     float qDot3 = 0.5f * ( q0 * gy - q1 * gz + q3 * gx);

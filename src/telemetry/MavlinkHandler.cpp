@@ -2,9 +2,30 @@
 
 MavlinkHandler mavlink;
 
+static FlightDataSnapshot defaultFlightData() {
+    return FlightDataSnapshot{
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        PWM_NEUTRAL, PWM_NEUTRAL, PWM_MIN, PWM_NEUTRAL,
+        false, true
+    };
+}
+
 void MavlinkHandler::init(uint32_t baud) {
     espUart.init(baud);
     Serial.println("[MAVLINK] Baslatildi.");
+}
+
+void MavlinkHandler::setFlightDataProvider(FlightDataProvider provider) {
+    _flightDataProvider = provider;
+}
+
+void MavlinkHandler::setRCOverrideHandler(RCOverrideHandler handler) {
+    _rcOverrideHandler = handler;
+}
+
+void MavlinkHandler::setRCClearHandler(RCClearHandler handler) {
+    _rcClearHandler = handler;
 }
 
 void MavlinkHandler::update() {
@@ -27,7 +48,7 @@ void MavlinkHandler::update() {
         sendHeartbeat();
     }
 
-    FlightData flightData = flightManager.getLatestData();
+    FlightDataSnapshot flightData = _flightDataProvider ? _flightDataProvider() : defaultFlightData();
 
     // Attitude — 10 Hz
     if (now - _lastAttitudeSent >= STREAM_ATTITUDE_MS) {
@@ -56,7 +77,7 @@ void MavlinkHandler::update() {
     // SYS_STATUS — 2 Hz
     if (now - _lastSysStatusSent >= STREAM_SYS_STATUS_MS) {
         _lastSysStatusSent = now;
-        sendSysStatus(flightManager.isArmed(), false);
+        sendSysStatus(flightData.armed, flightData.failsafe);
     }
 }
 
@@ -77,10 +98,31 @@ void MavlinkHandler::_handleMessage(mavlink_message_t& msg) {
             break;
         }
         case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE: {
-            // İleride: GCS'ten gelen RC override komutları
             mavlink_rc_channels_override_t rc;
             mavlink_msg_rc_channels_override_decode(&msg, &rc);
-            // TODO: FlightManager'a ilet
+
+            bool anyOverride = false;
+            uint16_t ch1 = PWM_NEUTRAL;
+            uint16_t ch2 = PWM_NEUTRAL;
+            uint16_t ch3 = PWM_MIN;
+            uint16_t ch4 = PWM_NEUTRAL;
+
+            if (rc.chan1_raw > 0 && rc.chan1_raw <= 2000) { ch1 = rc.chan1_raw; anyOverride = true; }
+            if (rc.chan2_raw > 0 && rc.chan2_raw <= 2000) { ch2 = rc.chan2_raw; anyOverride = true; }
+            if (rc.chan3_raw > 0 && rc.chan3_raw <= 2000) { ch3 = rc.chan3_raw; anyOverride = true; }
+            if (rc.chan4_raw > 0 && rc.chan4_raw <= 2000) { ch4 = rc.chan4_raw; anyOverride = true; }
+
+            if (anyOverride) {
+                if (_rcOverrideHandler) {
+                    _rcOverrideHandler(ch1, ch2, ch3, ch4);
+                    Serial.println("[MAVLINK] RC override applied.");
+                }
+            } else {
+                if (_rcClearHandler) {
+                    _rcClearHandler();
+                    Serial.println("[MAVLINK] RC override cleared.");
+                }
+            }
             break;
         }
         default:
@@ -146,14 +188,21 @@ void MavlinkHandler::sendSysStatus(bool armed, bool failsafe) {
     mavlink_message_t msg;
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
+    uint16_t battery_remaining = failsafe ? 0 : UINT16_MAX;
+    int16_t current_battery = -1;
+    uint16_t voltage_battery = 0;
+    uint8_t load = 0;
+
     mavlink_msg_sys_status_pack(
         MAV_SYSTEM_ID, MAV_COMPONENT_ID, &msg,
         0, 0, 0,
-        0,       // CPU yükü
-        0,       // batarya
-        -1, -1,  // akım, kalan
-        0, 0, 0, 0, 0, 0,
-        0, 0, 0  // MAVLink v2 ek parametreler
+        load,
+        voltage_battery,
+        current_battery,
+        battery_remaining,
+        0, 0,
+        0, 0, 0, 0,
+        0, 0, 0
     );
 
     uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);

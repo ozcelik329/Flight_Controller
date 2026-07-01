@@ -6,7 +6,8 @@
 class PID {
   public:
     PID(float kp, float ki, float kd);
-    float __not_in_flash_func(compute)(float setpoint, float measured_value, float dt);
+    float compute(float setpoint, float measured_value, float dt,
+                  float outputMin = -1000.0f, float outputMax = 1000.0f);
     void reset();
 
   private:

@@ -37,6 +37,9 @@ class FlightManager {
     uint16_t getElevator();
     uint16_t getThrottle();
     uint16_t getRudder();
+    void setRCOverride(uint16_t ch1, uint16_t ch2, uint16_t ch3, uint16_t ch4);
+    void clearRCOverride();
+    bool hasRCOverride() const;
     bool isArmed() const { return _armed; }
 
   private:
@@ -53,6 +56,9 @@ class FlightManager {
     bool     _armed           = false;
     uint32_t _armHoldStart    = 0;
     uint32_t _disarmHoldStart = 0;
+
+    bool     _overrideActive = false;
+    uint16_t _overrideChannels[4] = { PWM_NEUTRAL, PWM_NEUTRAL, PWM_MIN, PWM_NEUTRAL };
 
     void performSensorFusion(const SensorBuffer& buf);
     void updateArmDisarm(uint16_t throttle, uint16_t rudder);

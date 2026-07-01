@@ -29,7 +29,13 @@ void FlightManager::update() {
     data.yaw   = fusion.getYaw();
     data.timestamp = micros();
 
-    if (!rx.isValid()) {
+    if (_overrideActive) {
+        data.aileron  = _overrideChannels[0];
+        data.elevator = _overrideChannels[1];
+        data.throttle = _overrideChannels[2];
+        data.rudder   = _overrideChannels[3];
+        data.failsafe = false;
+    } else if (!rx.isValid()) {
         data.aileron  = PWM_NEUTRAL;
         data.elevator = PWM_NEUTRAL;
         data.throttle = PWM_MIN;
@@ -83,6 +89,26 @@ uint16_t FlightManager::getAileron()  { return _getLatest(_ringBuf, _latest).ail
 uint16_t FlightManager::getElevator() { return _getLatest(_ringBuf, _latest).elevator; }
 uint16_t FlightManager::getThrottle() { return _getLatest(_ringBuf, _latest).throttle; }
 uint16_t FlightManager::getRudder()   { return _getLatest(_ringBuf, _latest).rudder; }
+
+void FlightManager::setRCOverride(uint16_t ch1, uint16_t ch2, uint16_t ch3, uint16_t ch4) {
+    _overrideChannels[0] = ch1;
+    _overrideChannels[1] = ch2;
+    _overrideChannels[2] = ch3;
+    _overrideChannels[3] = ch4;
+    _overrideActive = true;
+}
+
+void FlightManager::clearRCOverride() {
+    _overrideActive = false;
+    _overrideChannels[0] = PWM_NEUTRAL;
+    _overrideChannels[1] = PWM_NEUTRAL;
+    _overrideChannels[2] = PWM_MIN;
+    _overrideChannels[3] = PWM_NEUTRAL;
+}
+
+bool FlightManager::hasRCOverride() const {
+    return _overrideActive;
+}
 
 void FlightManager::updateArmDisarm(uint16_t throttle, uint16_t rudder) {
     uint32_t now = millis();
